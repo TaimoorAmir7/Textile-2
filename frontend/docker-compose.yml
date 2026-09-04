@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: spark
+      POSTGRES_PASSWORD: spark
+      POSTGRES_DB: spark_reliability
+    ports:
+      - "5432:5432"
+    volumes:
+      - spark_pg:/var/lib/postgresql/data
+
+volumes:
+  spark_pg:

@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Reveal } from "@/components/Reveal";
 import { templateHref } from "@/components/PageTrail";
-import { apiGet } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 
 type Family = {
   slug: string;
@@ -14,12 +14,8 @@ type Family = {
 };
 
 export default function SolutionsPage() {
-  const [families, setFamilies] = useState<Family[]>([]);
+  const [families] = useMill<Family[]>("/api/families");
   const [filter, setFilter] = useState("all");
-
-  useEffect(() => {
-    apiGet<Family[]>("/api/families").then(setFamilies).catch(() => setFamilies([]));
-  }, []);
 
   const visible = families.filter((f) => filter === "all" || f.slug === filter);
 

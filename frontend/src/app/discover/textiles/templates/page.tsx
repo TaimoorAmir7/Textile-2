@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Reveal } from "@/components/Reveal";
-import { apiGet } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 
 type Template = {
   id: string;
@@ -17,11 +16,7 @@ type Template = {
 };
 
 export default function TemplateLibraryPage() {
-  const [templates, setTemplates] = useState<Template[]>([]);
-
-  useEffect(() => {
-    apiGet<Template[]>("/api/templates").then(setTemplates).catch(() => setTemplates([]));
-  }, []);
+  const [templates] = useMill<Template[]>("/api/templates");
 
   return (
     <div className="space-y-5 p-5">

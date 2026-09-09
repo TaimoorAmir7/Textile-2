@@ -1,17 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { apiGet } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 import { MetricCard, PageHeader } from "@/components/DashboardUI";
 
 type Template = { id: string; slug: string; name: string; overview: string; version: string; family: { name: string; assets: { monitored: boolean }[] } };
 
 export default function DeployIndexPage() {
-  const [templates, setTemplates] = useState<Template[]>([]);
-  useEffect(() => {
-    apiGet<Template[]>("/api/templates").then(setTemplates).catch(() => setTemplates([]));
-  }, []);
+  const [templates] = useMill<Template[]>("/api/templates");
 
   return (
     <div className="w-full space-y-5 p-4 sm:p-5">

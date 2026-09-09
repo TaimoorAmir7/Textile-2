@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { StatusPill } from "@/components/StatusPill";
-import { apiGet } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 import { AnalyticsData, DonutChart, HealthGauge, HorizontalRiskChart, KpiLineChart, TrendChart } from "@/components/AnalyticsCharts";
 import { ChartCard, DataTableShell, LoadingState, PageHeader } from "@/components/DashboardUI";
 import { useChartTheme } from "@/lib/chart-theme";
@@ -32,12 +32,8 @@ type Overview = {
 };
 
 export default function OperatePage() {
-  const [data, setData] = useState<Overview | null>(null);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  useEffect(() => {
-    apiGet<Overview>("/api/overview").then(setData).catch(() => setData(null));
-    apiGet<AnalyticsData>("/api/analytics?days=30").then(setAnalytics).catch(() => setAnalytics(null));
-  }, []);
+  const [data] = useMill<Overview>("/api/overview");
+  const [analytics] = useMill<AnalyticsData>("/api/analytics?days=30");
 
   const theme = useChartTheme();
   const recent = (analytics?.series ?? []).slice(-7);

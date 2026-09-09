@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { StatusPill } from "@/components/StatusPill";
-import { apiGet } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 import { AnalyticsData, HorizontalRiskChart } from "@/components/AnalyticsCharts";
 import { ChartCard, DataTableShell, MetricCard, PageHeader } from "@/components/DashboardUI";
 
@@ -22,20 +22,15 @@ type Asset = {
 
 function AssetsInner() {
   const params = useSearchParams();
-  const [rows, setRows] = useState<Asset[]>([]);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [filter, setFilter] = useState("");
   const [status, setStatus] = useState("all");
   const q = params.get("q") ?? "";
   const plant = params.get("plant") ?? "";
-
-  useEffect(() => {
-    const qs = new URLSearchParams();
-    if (q) qs.set("q", q);
-    if (plant) qs.set("plant", plant);
-    apiGet<Asset[]>(`/api/assets?${qs.toString()}`).then(setRows).catch(() => setRows([]));
-    apiGet<AnalyticsData>("/api/analytics").then(setAnalytics).catch(() => setAnalytics(null));
-  }, [q, plant]);
+  const qs = new URLSearchParams();
+  if (q) qs.set("q", q);
+  if (plant) qs.set("plant", plant);
+  const [rows] = useMill<Asset[]>(`/api/assets?${qs.toString()}`);
+  const [analytics] = useMill<AnalyticsData>("/api/analytics");
 
   const visible = rows
     .filter((asset) => status === "all" || asset.status === status)

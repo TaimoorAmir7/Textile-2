@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PriorityPill } from "@/components/StatusPill";
-import { apiGet, apiSend } from "@/lib/api";
+import { apiSend } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 import { AnalyticsData, DonutChart, TrendChart } from "@/components/AnalyticsCharts";
 import { ChartCard } from "@/components/DashboardUI";
 
@@ -24,32 +25,19 @@ function CasesInner() {
   const params = useSearchParams();
   const router = useRouter();
   const showNew = params.get("new") === "1";
-  const [rows, setRows] = useState<CaseRow[]>([]);
   const [status, setStatus] = useState("all");
   const [priority, setPriority] = useState("all");
   const [openForm, setOpenForm] = useState(showNew);
-  const [assets, setAssets] = useState<{ id: string; assetCode: string; name: string }[]>([]);
   const [form, setForm] = useState({ title: "", assetId: "", priority: "High", assignee: "", workOrderRef: "" });
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [toast, setToast] = useState<CaseRow | null>(null);
   const [releasing, setReleasing] = useState(false);
   const formRef = useRef<HTMLFormElement | null>(null);
-
-  function load() {
-    const qs = new URLSearchParams();
-    if (status !== "all") qs.set("status", status);
-    if (priority !== "all") qs.set("priority", priority);
-    apiGet<CaseRow[]>(`/api/cases?${qs.toString()}`).then(setRows).catch(() => setRows([]));
-  }
-
-  useEffect(() => {
-    load();
-    apiGet<{ id: string; assetCode: string; name: string }[]>("/api/assets")
-      .then(setAssets)
-      .catch(() => setAssets([]));
-    apiGet<AnalyticsData>("/api/analytics?days=30").then(setAnalytics).catch(() => setAnalytics(null));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, priority]);
+  const qs = new URLSearchParams();
+  if (status !== "all") qs.set("status", status);
+  if (priority !== "all") qs.set("priority", priority);
+  const [rows, reload] = useMill<CaseRow[]>(`/api/cases?${qs.toString()}`);
+  const [assets] = useMill<{ id: string; assetCode: string; name: string }[]>("/api/assets");
+  const [analytics] = useMill<AnalyticsData>("/api/analytics?days=30");
 
   useEffect(() => {
     if (!toast) return;
@@ -62,13 +50,13 @@ function CasesInner() {
     await apiSend("/api/cases", "POST", form);
     setOpenForm(false);
     setForm({ title: "", assetId: "", priority: "High", assignee: "", workOrderRef: "" });
-    load();
+    reload();
   }
 
   async function closeCase(row: CaseRow) {
     await apiSend(`/api/cases/${row.id}`, "PATCH", { status: "Resolved" });
     setToast(row);
-    load();
+    reload();
   }
 
   async function startWorkOrder() {

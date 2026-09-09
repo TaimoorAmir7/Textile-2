@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { apiGet } from "@/lib/api";
+import { useState } from "react";
+import { useMill } from "@/lib/use-mill";
 import { AnalyticsData, CostHealthScatter, HorizontalRiskChart, ReliabilityChart } from "@/components/AnalyticsCharts";
 import { ChartCard, DataTableShell, MetricCard, PageHeader } from "@/components/DashboardUI";
 
@@ -18,22 +18,11 @@ type Row = {
 };
 
 export default function OptimizePage() {
-  const [rows, setRows] = useState<Row[]>([]);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  const [avoidedPct, setAvoidedPct] = useState(0);
   const [days, setDays] = useState(30);
-  useEffect(() => {
-    apiGet<{ rows: Row[]; avoidedPct: number }>(`/api/optimize?days=${days}`)
-      .then((data) => {
-        setRows(data.rows ?? []);
-        setAvoidedPct(data.avoidedPct ?? 0);
-      })
-      .catch(() => {
-        setRows([]);
-        setAvoidedPct(0);
-      });
-    apiGet<AnalyticsData>(`/api/analytics?days=${days}`).then(setAnalytics).catch(() => setAnalytics(null));
-  }, [days]);
+  const [optimize] = useMill<{ rows: Row[]; avoidedPct: number }>(`/api/optimize?days=${days}`);
+  const [analytics] = useMill<AnalyticsData>(`/api/analytics?days=${days}`);
+  const rows = optimize.rows;
+  const avoidedPct = optimize.avoidedPct;
 
   function exportCsv() {
     const header = "Family,Assets,Alerts,Cases,Health,MTBF_h,MTTR_h,Downtime_h\n";

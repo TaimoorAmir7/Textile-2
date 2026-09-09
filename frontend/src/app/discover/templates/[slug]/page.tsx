@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { apiGet } from "@/lib/api";
+import { useEffect } from "react";
+import { useMillOrNull } from "@/lib/use-mill";
 import { recordVisit } from "@/lib/session-history";
 import { SignalPreviewChart } from "@/components/AnalyticsCharts";
 
@@ -22,11 +22,7 @@ type Template = {
 
 export default function TemplatePage() {
   const { slug } = useParams<{ slug: string }>();
-  const [tpl, setTpl] = useState<Template | null>(null);
-
-  useEffect(() => {
-    apiGet<Template>(`/api/templates/${slug}`).then(setTpl).catch(() => setTpl(null));
-  }, [slug]);
+  const [tpl] = useMillOrNull<Template>(`/api/templates/${slug}`);
 
   useEffect(() => {
     if (!tpl) return;

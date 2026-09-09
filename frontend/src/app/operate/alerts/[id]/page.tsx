@@ -14,7 +14,8 @@ import {
   YAxis,
 } from "recharts";
 import { chartTooltipWrapper, InfoTooltip } from "@/components/AnalyticsCharts";
-import { apiGet, apiSend } from "@/lib/api";
+import { apiSend } from "@/lib/api";
+import { useMillOrNull } from "@/lib/use-mill";
 import { useChartTheme } from "@/lib/chart-theme";
 import { recordVisit } from "@/lib/session-history";
 
@@ -81,14 +82,10 @@ function schematicFor(alert: Alert) {
 export default function InvestigationPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [alert, setAlert] = useState<Alert | null>(null);
+  const [alert, reload] = useMillOrNull<Alert>(`/api/alerts/${id}`);
   const [msg, setMsg] = useState("");
   const [range, setRange] = useState<"1H" | "24H" | "7D">("24H");
   const theme = useChartTheme();
-
-  function load() {
-    apiGet<Alert>(`/api/alerts/${id}`).then(setAlert).catch(() => setAlert(null));
-  }
 
   useEffect(() => {
     if (!alert) return;
@@ -100,15 +97,10 @@ export default function InvestigationPage() {
     });
   }, [alert]);
 
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
   async function setStatus(status: string) {
     await apiSend(`/api/alerts/${id}`, "PATCH", { status });
     setMsg(status === "acked" ? "Acknowledged" : "Snoozed");
-    load();
+    reload();
   }
 
   async function createCase() {

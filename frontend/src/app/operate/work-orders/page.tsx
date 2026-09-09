@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { PriorityPill } from "@/components/StatusPill";
-import { apiGet } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 import { MetricCard, PageHeader } from "@/components/DashboardUI";
 
 type CaseRow = {
@@ -24,11 +23,7 @@ function tradeStatus(status: string) {
 }
 
 export default function WorkOrdersPage() {
-  const [rows, setRows] = useState<CaseRow[]>([]);
-
-  useEffect(() => {
-    apiGet<CaseRow[]>("/api/cases").then(setRows).catch(() => setRows([]));
-  }, []);
+  const [rows] = useMill<CaseRow[]>("/api/cases");
 
   const orders = rows.filter((row) => row.workOrderRef);
   const open = orders.filter((row) => row.status !== "Resolved");

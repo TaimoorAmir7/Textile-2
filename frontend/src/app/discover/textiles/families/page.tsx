@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Reveal } from "@/components/Reveal";
-import { apiGet } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 import { AnalyticsData, HorizontalRiskChart } from "@/components/AnalyticsCharts";
 import { ChartCard } from "@/components/DashboardUI";
 
@@ -18,13 +17,8 @@ type Family = {
 };
 
 export default function FamiliesIndexPage() {
-  const [families, setFamilies] = useState<Family[]>([]);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-
-  useEffect(() => {
-    apiGet<Family[]>("/api/families").then(setFamilies).catch(() => setFamilies([]));
-    apiGet<AnalyticsData>("/api/analytics").then(setAnalytics).catch(() => setAnalytics(null));
-  }, []);
+  const [families] = useMill<Family[]>("/api/families");
+  const [analytics] = useMill<AnalyticsData>("/api/analytics");
 
   return (
     <div className="space-y-5 p-5">

@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Reveal } from "@/components/Reveal";
 import { StatusPill } from "@/components/StatusPill";
-import { apiGet } from "@/lib/api";
+import { useMillOrNull } from "@/lib/use-mill";
 import { recordVisit } from "@/lib/session-history";
 
 type FamilyDetail = {
@@ -25,11 +25,7 @@ type FamilyDetail = {
 
 export default function FamilyPage() {
   const { slug } = useParams<{ slug: string }>();
-  const [family, setFamily] = useState<FamilyDetail | null>(null);
-
-  useEffect(() => {
-    apiGet<FamilyDetail>(`/api/families/${slug}`).then(setFamily).catch(() => setFamily(null));
-  }, [slug]);
+  const [family] = useMillOrNull<FamilyDetail>(`/api/families/${slug}`);
 
   useEffect(() => {
     if (!family) return;

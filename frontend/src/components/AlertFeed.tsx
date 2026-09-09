@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { Reveal } from "@/components/Reveal";
 import { Sparkline } from "@/components/Sparkline";
 import { StatusPill } from "@/components/StatusPill";
-import { apiGet, apiSend } from "@/lib/api";
+import { apiSend } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 import { AnalyticsData, DonutChart, KpiLineChart, TrendChart } from "@/components/AnalyticsCharts";
 import { ChartCard } from "@/components/DashboardUI";
 import { useChartTheme } from "@/lib/chart-theme";
@@ -46,26 +47,17 @@ export function AlertFeed({
   eyebrow?: string;
   description?: string;
 }) {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [alerts, reload] = useMill<Alert[]>("/api/alerts");
+  const [analytics] = useMill<AnalyticsData>("/api/analytics?days=30");
   const [filter, setFilter] = useState("all");
   const [busy, setBusy] = useState<string | null>(null);
   const theme = useChartTheme();
-
-  function load() {
-    apiGet<Alert[]>("/api/alerts").then(setAlerts).catch(() => setAlerts([]));
-  }
-
-  useEffect(() => {
-    load();
-    apiGet<AnalyticsData>("/api/analytics?days=30").then(setAnalytics).catch(() => setAnalytics(null));
-  }, []);
 
   async function acknowledge(id: string) {
     setBusy(id);
     try {
       await apiSend(`/api/alerts/${id}`, "PATCH", { status: "acked" });
-      load();
+      reload();
     } finally {
       setBusy(null);
     }

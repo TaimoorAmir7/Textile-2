@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BackButton, isSubPage, rememberPath } from "@/components/PageTrail";
 import { SearchBox } from "@/components/SearchBox";
-import { apiGet } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 import { headerCrumbs, subscribeHeaderCrumbs } from "@/lib/header-path";
 import { describePath, recordVisit } from "@/lib/session-history";
 
@@ -32,23 +32,15 @@ function isActive(pathname: string, href: string) {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [criticalCount, setCriticalCount] = useState(0);
-  const [plants, setPlants] = useState<{ id: string; name: string; code: string }[]>([]);
+  const [overview] = useMill<{
+    criticalAlerts?: number;
+    kpis?: { criticalAlerts: number };
+    plants: { id: string; name: string; code: string }[];
+  }>("/api/overview");
+  const criticalCount = overview.kpis?.criticalAlerts ?? overview.criticalAlerts ?? 0;
+  const plants = overview.plants;
   const [plant, setPlant] = useState("all");
   const [theme, setTheme] = useState<"light" | "dark">("light");
-
-  useEffect(() => {
-    apiGet<{
-      criticalAlerts?: number;
-      kpis?: { criticalAlerts: number };
-      plants: { id: string; name: string; code: string }[];
-    }>("/api/overview")
-      .then((d) => {
-        setCriticalCount(d.kpis?.criticalAlerts ?? d.criticalAlerts ?? 0);
-        if (d.plants) setPlants(d.plants);
-      })
-      .catch(() => undefined);
-  }, [pathname]);
 
   useEffect(() => {
     const current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";

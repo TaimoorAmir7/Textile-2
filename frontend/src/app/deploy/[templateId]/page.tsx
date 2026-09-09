@@ -3,7 +3,8 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { KpiLineChart } from "@/components/AnalyticsCharts";
-import { apiGet, apiSend } from "@/lib/api";
+import { apiSend } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 import { useChartTheme } from "@/lib/chart-theme";
 import { setHeaderCrumbsOverride } from "@/lib/header-path";
 
@@ -34,18 +35,12 @@ export default function DeployWizardPage() {
   const router = useRouter();
   const theme = useChartTheme();
   const [step, setStep] = useState(0);
-  const [templates, setTemplates] = useState<Template[]>([]);
+  const [templates] = useMill<Template[]>("/api/templates");
   const [selected, setSelected] = useState<string[]>([]);
   const [tags, setTags] = useState<Record<string, string>>({});
   const [thresholds, setThresholds] = useState({ vibration: 4.5, temperature: 80, quality: 96 });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    apiGet<Template[]>("/api/templates").then((rows) => {
-      setTemplates(rows.map((t) => t as unknown as Template));
-    });
-  }, []);
 
   const tpl = useMemo(
     () => templates.find((t) => t.id === templateId) ?? templates.find((t) => t.slug === templateId),

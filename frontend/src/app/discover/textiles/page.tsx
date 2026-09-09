@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useMill } from "@/lib/use-mill";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { Reveal } from "@/components/Reveal";
 import { StatusPill } from "@/components/StatusPill";
@@ -9,7 +9,6 @@ import { AnalyticsData, DonutChart, HorizontalRiskChart, KpiLineChart, TrendChar
 import { ChartCard } from "@/components/DashboardUI";
 import { useChartTheme } from "@/lib/chart-theme";
 import { templateHref } from "@/components/PageTrail";
-import { apiGet } from "@/lib/api";
 
 const HERO_IMG =
   "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=1600&q=60";
@@ -48,19 +47,13 @@ type Overview = {
 };
 
 export default function TextilesOverviewPage() {
-  const [families, setFamilies] = useState<Family[]>([]);
-  const [data, setData] = useState<Overview | null>(null);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [families] = useMill<Family[]>("/api/families");
+  const [data] = useMill<Overview>("/api/overview");
+  const [analytics] = useMill<AnalyticsData>("/api/analytics?days=30");
 
-  useEffect(() => {
-    apiGet<Family[]>("/api/families").then(setFamilies).catch(() => setFamilies([]));
-    apiGet<Overview>("/api/overview").then(setData).catch(() => setData(null));
-    apiGet<AnalyticsData>("/api/analytics?days=30").then(setAnalytics).catch(() => setAnalytics(null));
-  }, []);
-
-  const monitored = data?.assets.filter((a) => a.monitored).length ?? 0;
-  const totalAssets = data?.assets.length ?? 0;
-  const atRisk = data?.assets.filter((a) => a.status !== "NOMINAL").length ?? 0;
+  const monitored = data.assets.filter((a) => a.monitored).length;
+  const totalAssets = data.assets.length;
+  const atRisk = data.assets.filter((a) => a.status !== "NOMINAL").length;
   const solutions = families.flatMap((f) =>
     f.useCases.map((u) => ({
       ...u,
@@ -124,10 +117,10 @@ export default function TextilesOverviewPage() {
             label="Active alerts"
             icon="warning"
             tone="error"
-            value={data?.kpis.activeAlerts ?? 0}
-            caption={`${data?.kpis.criticalAlerts ?? 0} critical now`}
-            trend={(analytics?.series ?? []).slice(-7).map((point) => point.alerts)}
-            trendLabels={(analytics?.series ?? []).slice(-7).map((point) => point.label)}
+            value={data.kpis.activeAlerts}
+            caption={`${data.kpis.criticalAlerts} critical now`}
+            trend={analytics.series.slice(-7).map((point) => point.alerts)}
+            trendLabels={analytics.series.slice(-7).map((point) => point.label)}
             seriesName="Active alerts"
           />
         </Reveal>
@@ -137,8 +130,8 @@ export default function TextilesOverviewPage() {
             icon="precision_manufacturing"
             value={monitored}
             caption={`of ${totalAssets} mill assets`}
-            trend={(analytics?.series ?? []).slice(-7).map((point) => point.health)}
-            trendLabels={(analytics?.series ?? []).slice(-7).map((point) => point.label)}
+            trend={analytics.series.slice(-7).map((point) => point.health)}
+            trendLabels={analytics.series.slice(-7).map((point) => point.label)}
             seriesName="Mill health"
             seriesUnit="%"
           />
@@ -150,8 +143,8 @@ export default function TextilesOverviewPage() {
             tone="warning"
             value={atRisk}
             caption="watch or critical health"
-            trend={(analytics?.series ?? []).slice(-7).map((point) => point.critical)}
-            trendLabels={(analytics?.series ?? []).slice(-7).map((point) => point.label)}
+            trend={analytics.series.slice(-7).map((point) => point.critical)}
+            trendLabels={analytics.series.slice(-7).map((point) => point.label)}
             seriesName="Assets at risk"
           />
         </Reveal>
@@ -160,18 +153,18 @@ export default function TextilesOverviewPage() {
             label="Avoided downtime"
             icon="savings"
             highlight
-            value={data?.kpis.avoidedDowntimePct ?? 0}
+            value={data.kpis.avoidedDowntimePct}
             suffix="%"
-            caption={`${data?.kpis.avoidedDowntimeHrs ?? 0} h of ${data?.kpis.potentialDowntimeHrs ?? 0} h potential`}
-            trend={(analytics?.series ?? []).slice(-7).map((point) => point.health)}
-            trendLabels={(analytics?.series ?? []).slice(-7).map((point) => point.label)}
+            caption={`${data.kpis.avoidedDowntimeHrs} h of ${data.kpis.potentialDowntimeHrs} h potential`}
+            trend={analytics.series.slice(-7).map((point) => point.health)}
+            trendLabels={analytics.series.slice(-7).map((point) => point.label)}
             seriesName="Health trend"
             seriesUnit="%"
           />
         </Reveal>
       </section>
 
-      {analytics ? (
+      {analytics.series.length ? (
         <section className="grid min-w-0 grid-cols-1 items-stretch gap-4 md:grid-cols-3">
           <ChartCard
             title="Reliability pulse"
@@ -210,7 +203,7 @@ export default function TextilesOverviewPage() {
               </Link>
             </div>
             <ul className="flex flex-1 flex-col divide-y divide-outline-variant">
-              {(data?.recentAlerts ?? []).slice(0, 5).map((a, i) => (
+              {data.recentAlerts.slice(0, 5).map((a, i) => (
                 <li key={a.id} className="anim-slide-in flex-1" style={{ animationDelay: `${i * 70}ms` }}>
                   <Link
                     href={`/operate/alerts/${a.id}`}
@@ -241,7 +234,7 @@ export default function TextilesOverviewPage() {
               <h2 className="font-headline text-lg font-semibold text-primary">Mill Facilities</h2>
             </div>
             <div className="flex flex-1 flex-col justify-evenly gap-3 p-4">
-              {(data?.plants ?? []).map((p, i) => (
+              {data.plants.map((p, i) => (
                 <Link
                   key={p.id}
                   href={`/operate/assets?plant=${p.code}`}

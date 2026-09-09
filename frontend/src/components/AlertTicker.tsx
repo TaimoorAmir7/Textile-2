@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { apiGet } from "@/lib/api";
+import { useMill } from "@/lib/use-mill";
 
 type TickerAlert = {
   id: string;
@@ -13,24 +12,8 @@ type TickerAlert = {
 };
 
 export function AlertTicker() {
-  const [alerts, setAlerts] = useState<TickerAlert[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    function load() {
-      apiGet<TickerAlert[]>("/api/alerts")
-        .then((rows) => {
-          if (!cancelled) setAlerts(rows.filter((a) => a.status !== "snoozed"));
-        })
-        .catch(() => undefined);
-    }
-    load();
-    const timer = setInterval(load, 20000);
-    return () => {
-      cancelled = true;
-      clearInterval(timer);
-    };
-  }, []);
+  const [rows] = useMill<TickerAlert[]>("/api/alerts");
+  const alerts = rows.filter((a) => a.status !== "snoozed");
 
   if (!alerts.length) return null;
 

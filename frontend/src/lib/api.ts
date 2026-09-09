@@ -24,7 +24,7 @@ function parse(path: string) {
   return new URL(path, "http://local.catalog");
 }
 
-export async function apiGet<T>(path: string): Promise<T> {
+export function readCatalog<T>(path: string): T {
   const url = parse(path);
   const route = url.pathname;
   const q = url.searchParams;
@@ -64,6 +64,10 @@ export async function apiGet<T>(path: string): Promise<T> {
   }
 
   throw new Error(`GET ${path} failed (404)`);
+}
+
+export async function apiGet<T>(path: string): Promise<T> {
+  return readCatalog<T>(path);
 }
 
 export async function apiSend<T>(

@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap");
 @import "tailwindcss";
 
 @font-face {
@@ -14,115 +15,184 @@
   --font-mono-data: var(--font-jetbrains);
   --spacing-sidebar-width: 260px;
   --spacing-sidebar-rail-width: 72px;
-  --spacing-container-margin: 24px;
-  --spacing-gutter: 16px;
-  --radius-sm: 0.125rem;
-  --radius-DEFAULT: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
+  --spacing-container-margin: 40px;
+  --spacing-gutter: 32px;
+  --radius-sm: 0.375rem;
+  --radius-DEFAULT: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --color-surface: var(--spark-surface);
+  --color-surface-dim: var(--spark-surface-dim);
+  --color-surface-bright: var(--spark-surface-bright);
+  --color-surface-container-lowest: var(--spark-surface-container-lowest);
+  --color-surface-container-low: var(--spark-surface-container-low);
+  --color-surface-container: var(--spark-surface-container);
+  --color-surface-container-high: var(--spark-surface-container-high);
+  --color-surface-container-highest: var(--spark-surface-container-highest);
+  --color-on-surface: var(--spark-on-surface);
+  --color-on-surface-variant: var(--spark-on-surface-variant);
+  --color-inverse-surface: var(--spark-inverse-surface);
+  --color-inverse-on-surface: var(--spark-inverse-on-surface);
+  --color-outline: var(--spark-outline);
+  --color-outline-variant: var(--spark-outline-variant);
+  --color-surface-tint: var(--spark-surface-tint);
+  --color-primary: var(--spark-primary);
+  --color-on-primary: var(--spark-on-primary);
+  --color-primary-container: var(--spark-primary-container);
+  --color-on-primary-container: var(--spark-on-primary-container);
+  --color-inverse-primary: var(--spark-inverse-primary);
+  --color-secondary: var(--spark-secondary);
+  --color-on-secondary: var(--spark-on-secondary);
+  --color-secondary-container: var(--spark-secondary-container);
+  --color-on-secondary-container: var(--spark-on-secondary-container);
+  --color-tertiary: var(--spark-tertiary);
+  --color-on-tertiary: var(--spark-on-tertiary);
+  --color-tertiary-container: var(--spark-tertiary-container);
+  --color-on-tertiary-container: var(--spark-on-tertiary-container);
+  --color-error: var(--spark-error);
+  --color-on-error: var(--spark-on-error);
+  --color-error-container: var(--spark-error-container);
+  --color-on-error-container: var(--spark-on-error-container);
+  --color-primary-fixed: var(--spark-primary-fixed);
+  --color-primary-fixed-dim: var(--spark-primary-fixed-dim);
+  --color-on-primary-fixed: var(--spark-on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--spark-on-primary-fixed-variant);
+  --color-secondary-fixed: var(--spark-secondary-fixed);
+  --color-secondary-fixed-dim: var(--spark-secondary-fixed-dim);
+  --color-on-secondary-fixed: var(--spark-on-secondary-fixed);
+  --color-on-secondary-fixed-variant: var(--spark-on-secondary-fixed-variant);
+  --color-background: var(--spark-background);
+  --color-on-background: var(--spark-on-background);
+  --color-surface-variant: var(--spark-surface-variant);
+  --color-warning: var(--spark-warning);
+  --color-success-soft: var(--spark-success-soft);
+  --color-success-text: var(--spark-success-text);
+  --color-warning-soft: var(--spark-warning-soft);
+  --color-warning-text: var(--spark-warning-text);
 }
 
-@theme {
-  --color-surface: #f7fafc;
-  --color-surface-dim: #d7dadc;
-  --color-surface-bright: #f7fafc;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f1f4f6;
-  --color-surface-container: #ebeef0;
-  --color-surface-container-high: #e5e9eb;
-  --color-surface-container-highest: #e0e3e5;
-  --color-on-surface: #181c1e;
-  --color-on-surface-variant: #44474e;
-  --color-inverse-surface: #2d3133;
-  --color-inverse-on-surface: #eef1f3;
-  --color-outline: #74777f;
-  --color-outline-variant: #c4c6cf;
-  --color-surface-tint: #465f88;
-  --color-primary: #002046;
-  --color-on-primary: #ffffff;
-  --color-primary-container: #1b365d;
-  --color-on-primary-container: #87a0cd;
-  --color-inverse-primary: #aec7f7;
-  --color-secondary: #006a6a;
-  --color-on-secondary: #ffffff;
-  --color-secondary-container: #8cf3f3;
-  --color-on-secondary-container: #007070;
-  --color-tertiary: #4b0004;
-  --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #73000a;
-  --color-on-tertiary-container: #ff7369;
-  --color-error: #ba1a1a;
-  --color-on-error: #ffffff;
-  --color-error-container: #ffdad6;
-  --color-on-error-container: #93000a;
-  --color-primary-fixed: #d6e3ff;
-  --color-primary-fixed-dim: #aec7f7;
-  --color-on-primary-fixed: #001b3d;
-  --color-on-primary-fixed-variant: #2e476f;
-  --color-secondary-fixed: #8cf3f3;
-  --color-secondary-fixed-dim: #6fd7d6;
-  --color-on-secondary-fixed: #002020;
-  --color-on-secondary-fixed-variant: #004f4f;
-  --color-background: #f7fafc;
-  --color-on-background: #181c1e;
-  --color-surface-variant: #e0e3e5;
-  --color-warning: #ffa000;
-  --color-success-soft: #e8f5e9;
-  --color-success-text: #1b5e20;
-  --color-warning-soft: #fff8e1;
-  --color-warning-text: #f57f17;
-}
-
-html {
+:root {
   color-scheme: light;
+  --font-hanken: "Outfit", sans-serif;
+  --font-inter: "Plus Jakarta Sans", sans-serif;
+  --font-jetbrains: "JetBrains Mono", ui-monospace, monospace;
+  --spark-surface: #f4f5f7;
+  --spark-surface-dim: #e5e7eb;
+  --spark-surface-bright: #ffffff;
+  --spark-surface-container-lowest: #ffffff;
+  --spark-surface-container-low: #f3f4f6;
+  --spark-surface-container: #eef0f3;
+  --spark-surface-container-high: #e5e7eb;
+  --spark-surface-container-highest: #d1d5db;
+  --spark-on-surface: #111827;
+  --spark-on-surface-variant: #4b5563;
+  --spark-inverse-surface: #111827;
+  --spark-inverse-on-surface: #f9fafb;
+  --spark-outline: #9ca3af;
+  --spark-outline-variant: #e5e7eb;
+  --spark-surface-tint: #1f2937;
+  --spark-primary: #1f2937;
+  --spark-on-primary: #ffffff;
+  --spark-primary-container: #e5e7eb;
+  --spark-on-primary-container: #111827;
+  --spark-inverse-primary: #d1d5db;
+  --spark-secondary: #0f766e;
+  --spark-on-secondary: #ffffff;
+  --spark-secondary-container: #ccfbf1;
+  --spark-on-secondary-container: #134e4a;
+  --spark-tertiary: #374151;
+  --spark-on-tertiary: #ffffff;
+  --spark-tertiary-container: #e5e7eb;
+  --spark-on-tertiary-container: #1f2937;
+  --spark-error: #dc2626;
+  --spark-on-error: #ffffff;
+  --spark-error-container: #fee2e2;
+  --spark-on-error-container: #7f1d1d;
+  --spark-primary-fixed: #e5e7eb;
+  --spark-primary-fixed-dim: #9ca3af;
+  --spark-on-primary-fixed: #111827;
+  --spark-on-primary-fixed-variant: #374151;
+  --spark-secondary-fixed: #ccfbf1;
+  --spark-secondary-fixed-dim: #5eead4;
+  --spark-on-secondary-fixed: #042f2e;
+  --spark-on-secondary-fixed-variant: #0f766e;
+  --spark-background: #f3f4f6;
+  --spark-on-background: #111827;
+  --spark-surface-variant: #eef0f3;
+  --spark-warning: #f59e0b;
+  --spark-success-soft: #d1fae5;
+  --spark-success-text: #047857;
+  --spark-warning-soft: #fef3c7;
+  --spark-warning-text: #b45309;
 }
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --color-surface: #101416;
-  --color-surface-dim: #0b0f11;
-  --color-surface-bright: #303537;
-  --color-surface-container-lowest: #15191b;
-  --color-surface-container-low: #1a1f21;
-  --color-surface-container: #202527;
-  --color-surface-container-high: #272c2f;
-  --color-surface-container-highest: #313638;
-  --color-on-surface: #e1e3e5;
-  --color-on-surface-variant: #c4c6cf;
-  --color-outline: #8e9099;
-  --color-outline-variant: #44474e;
-  --color-primary: #aec7f7;
-  --color-on-primary: #12315a;
-  --color-primary-container: #2e476f;
-  --color-on-primary-container: #d6e3ff;
-  --color-secondary: #6fd7d6;
-  --color-on-secondary: #003737;
-  --color-secondary-container: #004f4f;
-  --color-on-secondary-container: #8cf3f3;
-  --color-tertiary: #ffb4ab;
-  --color-on-tertiary: #690005;
-  --color-tertiary-container: #93000a;
-  --color-on-tertiary-container: #ffdad6;
-  --color-error: #ffb4ab;
-  --color-on-error: #690005;
-  --color-error-container: #93000a;
-  --color-on-error-container: #ffdad6;
-  --color-background: #101416;
-  --color-on-background: #e1e3e5;
-  --color-surface-variant: #44474e;
-  --color-warning: #ffca70;
-  --color-success-soft: #193b2b;
-  --color-success-text: #9bd5ad;
-  --color-warning-soft: #3d3017;
-  --color-warning-text: #ffca70;
+  --spark-surface: #16181d;
+  --spark-surface-dim: #0f1115;
+  --spark-surface-bright: #2a2e36;
+  --spark-surface-container-lowest: #1c1f26;
+  --spark-surface-container-low: #22262e;
+  --spark-surface-container: #2a2f38;
+  --spark-surface-container-high: #343a45;
+  --spark-surface-container-highest: #3f4652;
+  --spark-on-surface: #f3f4f6;
+  --spark-on-surface-variant: #9ca3af;
+  --spark-inverse-surface: #f3f4f6;
+  --spark-inverse-on-surface: #111827;
+  --spark-outline: #6b7280;
+  --spark-outline-variant: #374151;
+  --spark-surface-tint: #e5e7eb;
+  --spark-primary: #e5e7eb;
+  --spark-on-primary: #111827;
+  --spark-primary-container: #374151;
+  --spark-on-primary-container: #f9fafb;
+  --spark-inverse-primary: #1f2937;
+  --spark-secondary: #5eead4;
+  --spark-on-secondary: #042f2e;
+  --spark-secondary-container: #115e59;
+  --spark-on-secondary-container: #ccfbf1;
+  --spark-tertiary: #d1d5db;
+  --spark-on-tertiary: #111827;
+  --spark-tertiary-container: #374151;
+  --spark-on-tertiary-container: #f3f4f6;
+  --spark-error: #f87171;
+  --spark-on-error: #450a0a;
+  --spark-error-container: #7f1d1d;
+  --spark-on-error-container: #fee2e2;
+  --spark-primary-fixed: #e5e7eb;
+  --spark-primary-fixed-dim: #9ca3af;
+  --spark-on-primary-fixed: #111827;
+  --spark-on-primary-fixed-variant: #374151;
+  --spark-secondary-fixed: #ccfbf1;
+  --spark-secondary-fixed-dim: #5eead4;
+  --spark-on-secondary-fixed: #042f2e;
+  --spark-on-secondary-fixed-variant: #0f766e;
+  --spark-background: #111318;
+  --spark-on-background: #f3f4f6;
+  --spark-surface-variant: #2a2f38;
+  --spark-warning: #fbbf24;
+  --spark-success-soft: #064e3b;
+  --spark-success-text: #6ee7b7;
+  --spark-warning-soft: #451a03;
+  --spark-warning-text: #fcd34d;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html,
 body {
   height: 100%;
   max-width: 100%;
-  background: var(--color-background);
-  color: var(--color-on-background);
+  background:
+    radial-gradient(1200px 520px at 8% -10%, color-mix(in srgb, var(--spark-secondary) 18%, transparent), transparent 60%),
+    radial-gradient(900px 480px at 100% 0%, color-mix(in srgb, var(--spark-tertiary) 16%, transparent), transparent 55%),
+    var(--spark-background);
+  color: var(--spark-on-background);
 }
 
 * {
@@ -254,12 +324,23 @@ textarea {
   }
 }
 
+@keyframes spark-pop {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .reveal {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(28px) scale(0.94);
   transition:
-    opacity 0.55s ease,
-    transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal[data-visible="true"] {
@@ -268,8 +349,22 @@ textarea {
 }
 
 .anim-fade-up {
-  animation: spark-fade-up 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: spark-pop 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+.card-pop {
+  animation: spark-pop 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.pop-scope > * {
+  animation: spark-pop 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.pop-scope > *:nth-child(2) { animation-delay: 60ms; }
+.pop-scope > *:nth-child(3) { animation-delay: 110ms; }
+.pop-scope > *:nth-child(4) { animation-delay: 160ms; }
+.pop-scope > *:nth-child(5) { animation-delay: 210ms; }
+.pop-scope > *:nth-child(6) { animation-delay: 260ms; }
 
 .anim-slide-in {
   animation: spark-slide-in 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
@@ -277,15 +372,17 @@ textarea {
 
 .lift {
   transition:
-    transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.25s ease,
-    background-color 0.25s ease;
+    background-color 0.25s ease,
+    box-shadow 0.35s ease;
   will-change: transform;
 }
 
 .lift:hover {
-  transform: translateY(-3px);
+  transform: translateY(-6px) scale(1.01);
   border-color: var(--color-secondary);
+  box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--spark-primary) 45%, transparent);
 }
 
 .pulse-dot {
@@ -375,9 +472,15 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .reveal,
   .anim-fade-up,
   .anim-slide-in,
+  .card-pop,
+  .pop-scope > *,
   .lift,
   .ticker-track,
   .draw-line,

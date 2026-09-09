@@ -7,15 +7,16 @@ import {
   CartesianGrid,
   Line,
   LineChart,
-  Legend,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
+import { chartTooltipWrapper, InfoTooltip } from "@/components/AnalyticsCharts";
 import { apiGet, apiSend } from "@/lib/api";
 import { useChartTheme } from "@/lib/chart-theme";
+import { recordVisit } from "@/lib/session-history";
 
 type Point = { t: number; v: number };
 type Payload = {
@@ -38,8 +39,44 @@ type Alert = {
     model: string;
     lastService: string;
     plant: { name: string };
+    family: { slug: string; name: string };
   };
 };
+
+function schematicFor(alert: Alert) {
+  const slug = alert.asset.family?.slug ?? "";
+  const title = alert.title.toLowerCase();
+  if (slug.includes("spinning") || title.includes("spindle") || title.includes("bearing")) {
+    if (title.includes("bearing") || title.includes("alignment") || title.includes("spindle")) {
+      return {
+        src: "/schematics/spinning-ring-traveller.png",
+        alt: "Labeled ring, traveller, and spindle assembly",
+        caption: "Ring, traveller, and spindle",
+        hotspot: { top: "68%", left: "54%" },
+      };
+    }
+    return {
+      src: "/schematics/spinning-sensor-map.png",
+      alt: "Ring spinning frame sensor placement",
+      caption: "Spinning frame sensor map",
+      hotspot: { top: "74%", left: "30%" },
+    };
+  }
+  if (slug.includes("loom") || title.includes("loom") || title.includes("yarn") || title.includes("sley")) {
+    return {
+      src: "/schematics/loom-sensor-map.png",
+      alt: "Air-jet loom with vibration, pressure, and tension sensors",
+      caption: "Air-jet loom sensor map",
+      hotspot: { top: "32%", left: "48%" },
+    };
+  }
+  return {
+    src: "/schematics/dye-pump-hex.png",
+    alt: "Jet dyeing pump, heat exchanger, and addition tank",
+    caption: "Dye liquor pump and heat exchanger",
+    hotspot: { top: "42%", left: "46%" },
+  };
+}
 
 export default function InvestigationPage() {
   const { id } = useParams<{ id: string }>();
@@ -52,6 +89,16 @@ export default function InvestigationPage() {
   function load() {
     apiGet<Alert>(`/api/alerts/${id}`).then(setAlert).catch(() => setAlert(null));
   }
+
+  useEffect(() => {
+    if (!alert) return;
+    recordVisit({
+      href: `/operate/alerts/${alert.id}`,
+      title: alert.title,
+      sub: alert.asset.assetCode,
+      icon: "troubleshoot",
+    });
+  }, [alert]);
 
   useEffect(() => {
     load();
@@ -70,7 +117,7 @@ export default function InvestigationPage() {
       title: alert.title,
       assetId: alert.asset.id,
       alertId: alert.id,
-      priority: alert.severity === "CRITICAL" ? "Critical" : "High",
+      priority: alert.severity === "CRITICAL" ? "Critical" : alert.severity === "WATCH" ? "High" : "Low",
     });
     router.push("/operate/cases");
   }
@@ -84,15 +131,13 @@ export default function InvestigationPage() {
     temperature: payload.temperature?.[i]?.v,
   })) ?? [];
   const visibleDiagnostics = range === "1H" ? diagnostics.slice(-6) : diagnostics;
+  const drawing = schematicFor(alert);
 
   return (
     <div className="p-6">
       <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <Link href="/operate/alerts" className="text-on-surface-variant hover:text-primary">
-            <span className="material-symbols-outlined text-sm">arrow_back</span>
-          </Link>
-          <p className="font-label-caps mt-1 text-on-surface-variant">Alert Investigation</p>
+          <p className="font-label-caps text-on-surface-variant">Alert Investigation</p>
           <h2 className="font-headline mt-1 flex flex-wrap items-center gap-3 text-2xl font-bold sm:text-3xl">
             {alert.title}
             <span className="rounded-sm bg-error px-2 py-1 font-label-caps text-[10px] text-on-error">
@@ -135,9 +180,13 @@ export default function InvestigationPage() {
 
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 space-y-4 lg:col-span-8">
-          <div className="h-[320px] rounded border border-outline-variant bg-surface-container-lowest p-4">
+          <div className="h-[320px] rounded-2xl border border-outline-variant bg-surface-container-lowest p-4">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <h3 className="font-headline text-lg font-semibold">Time-Series Diagnostics</h3>
+              <div className="flex flex-wrap items-center gap-3 text-[11px] text-on-surface-variant">
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ background: theme.primary }} />Vibration (mm/s)</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ background: theme.secondary }} />Temperature (°C)</span>
+              </div>
               <div className="flex rounded border border-outline-variant p-0.5">
                 {(["1H", "24H", "7D"] as const).map((item) => (
                   <button key={item} type="button" onClick={() => setRange(item)} className={`rounded px-2 py-1 font-label-caps ${range === item ? "bg-primary text-on-primary" : "text-on-surface-variant"}`}>
@@ -152,11 +201,10 @@ export default function InvestigationPage() {
                 <XAxis dataKey="t" tick={{ fill: theme.axis, fontSize: 11 }} minTickGap={24} />
                 <YAxis yAxisId="vibration" tick={{ fill: theme.axis, fontSize: 11 }} label={{ value: "mm/s", angle: -90, position: "insideLeft", fill: theme.axis, fontSize: 11 }} />
                 <YAxis yAxisId="temperature" orientation="right" tick={{ fill: theme.axis, fontSize: 11 }} label={{ value: "°C", angle: 90, position: "insideRight", fill: theme.axis, fontSize: 11 }} />
-                <Tooltip contentStyle={{ background: theme.surface, border: `1px solid ${theme.grid}`, borderRadius: 6, color: theme.onSurface, fontSize: 12 }} />
-                <Legend verticalAlign="top" height={26} wrapperStyle={{ fontSize: 11 }} />
+                <Tooltip content={<InfoTooltip />} wrapperStyle={chartTooltipWrapper} />
                 <ReferenceLine yAxisId="vibration" y={4.5} stroke={theme.error} strokeDasharray="5 4" label={{ value: "Alert threshold", fill: theme.error, fontSize: 10, position: "insideBottomRight" }} />
-                <Line yAxisId="vibration" type="monotone" dataKey="vibration" stroke={theme.primary} strokeWidth={2} dot={false} name="Vibration (mm/s)" />
-                <Line yAxisId="temperature" type="monotone" dataKey="temperature" stroke={theme.secondary} strokeWidth={2} dot={false} name="Temperature (°C)" />
+                <Line yAxisId="vibration" type="natural" dataKey="vibration" stroke={theme.primary} strokeWidth={2.6} dot={false} activeDot={{ r: 6 }} name="Vibration (mm/s)" />
+                <Line yAxisId="temperature" type="natural" dataKey="temperature" stroke={theme.secondary} strokeWidth={2.6} dot={false} activeDot={{ r: 6 }} name="Temperature (°C)" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -171,7 +219,7 @@ export default function InvestigationPage() {
                       <span>{m.name}</span>
                       <span className="font-data-mono font-bold text-error">{m.confidence}%</span>
                     </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-surface-variant">
+                    <div className="h-1.5 overflow-hidden rounded-md bg-surface-variant">
                       <div className="h-full bg-error" style={{ width: `${m.confidence}%` }} />
                     </div>
                   </div>
@@ -204,12 +252,25 @@ export default function InvestigationPage() {
           <div className="space-y-4">
           <div className="rounded border border-outline-variant bg-surface-container-lowest p-4">
             <h3 className="mb-3 font-headline text-lg font-semibold">Component Schematic</h3>
-            <div className="relative flex h-52 items-center justify-center overflow-hidden rounded border border-outline-variant bg-surface-container-low">
-              <div className="absolute h-36 w-36 rounded-full border-[18px] border-primary-container" />
-              <div className="absolute h-20 w-20 rounded-full border-[12px] border-secondary" />
-              <div className="absolute h-7 w-7 rounded-full bg-primary" />
-              <span className="absolute top-6 right-6 pulse-dot h-3 w-3 rounded-full bg-error text-error" />
-              <p className="absolute bottom-3 font-label-caps text-on-surface-variant">Drive-end bearing assembly</p>
+            <div className="overflow-hidden rounded border border-outline-variant bg-white">
+              <div className="relative h-72">
+                <img src={drawing.src} alt={drawing.alt} className="h-full w-full object-contain p-2" />
+                {alert.severity !== "NOMINAL" ? (
+                  <>
+                    <span
+                      className="absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-error/40"
+                      style={drawing.hotspot}
+                    />
+                    <span
+                      className="pulse-dot absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-error"
+                      style={drawing.hotspot}
+                    />
+                  </>
+                ) : null}
+              </div>
+              <p className="border-t border-outline-variant bg-surface-container-low px-3 py-2 font-label-caps text-on-surface-variant">
+                {drawing.caption} · {alert.asset.assetCode}
+              </p>
             </div>
           </div>
           <div className="rounded border border-outline-variant bg-surface-container-lowest p-4">

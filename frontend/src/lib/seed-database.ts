@@ -261,7 +261,7 @@ export async function seedDatabase(prisma: PrismaClient) {
       templateId: spinningTpl.id,
     },
   });
-  await prisma.asset.create({
+  const sf301c = await prisma.asset.create({
     data: {
       assetCode: "SF-301C",
       name: "Ring Frame SF-301C",
@@ -275,7 +275,7 @@ export async function seedDatabase(prisma: PrismaClient) {
       familyId: spinning.id,
     },
   });
-  await prisma.asset.create({
+  const sf301d = await prisma.asset.create({
     data: {
       assetCode: "SF-301D",
       name: "Ring Frame SF-301D",
@@ -306,7 +306,7 @@ export async function seedDatabase(prisma: PrismaClient) {
       templateId: loomTpl.id,
     },
   });
-  await prisma.asset.create({
+  const loomT200Healthy = await prisma.asset.create({
     data: {
       assetCode: "AJ-T200-08",
       name: "High-Speed Loom T-200 #08",
@@ -321,7 +321,7 @@ export async function seedDatabase(prisma: PrismaClient) {
       templateId: loomTpl.id,
     },
   });
-  await prisma.asset.create({
+  const loomT180 = await prisma.asset.create({
     data: {
       assetCode: "AJ-T180-03",
       name: "Air-Jet Loom T-180 #03",
@@ -351,7 +351,7 @@ export async function seedDatabase(prisma: PrismaClient) {
       templateId: dyeTpl.id,
     },
   });
-  await prisma.asset.create({
+  const dye02 = await prisma.asset.create({
     data: {
       assetCode: "DY-J800-02",
       name: "Jet Dyeing Machine 02",
@@ -443,6 +443,50 @@ export async function seedDatabase(prisma: PrismaClient) {
 
   await prisma.alert.create({
     data: {
+      title: "Spindle health within envelope — SF-301D",
+      severity: "NOMINAL",
+      status: "acked",
+      detectedAt: new Date(Date.now() - 1000 * 60 * 25),
+      assetId: sf301d.id,
+      payload: {
+        vibration: series(24, 0.7, 0.01),
+        temperature: series(24, 46, 0.02),
+        failureModes: [{ name: "No defect indicated", confidence: 8 }],
+        rootCauses: [
+          "Spindle vibration holds 0.6–0.8 mm/s against the family baseline",
+          "Bearing temperature stable through the last two doffs",
+        ],
+        actions: [
+          { title: "Keep on standard inspection", detail: "Next planned check at 400 running hours." },
+        ],
+      },
+    },
+  });
+
+  await prisma.alert.create({
+    data: {
+      title: "Loom baseline confirmed — AJ-T200-08",
+      severity: "NOMINAL",
+      status: "acked",
+      detectedAt: new Date(Date.now() - 1000 * 60 * 80),
+      assetId: loomT200Healthy.id,
+      payload: {
+        vibration: series(24, 1.1, 0.015),
+        temperature: series(24, 41, 0.01),
+        failureModes: [{ name: "No defect indicated", confidence: 6 }],
+        rootCauses: [
+          "Sley vibration and warp tension inside the healthy envelope",
+          "Pick rate holding at 1,050 PPM with no yarn-break cluster",
+        ],
+        actions: [
+          { title: "No intervention required", detail: "Continue routine monitoring on Line A." },
+        ],
+      },
+    },
+  });
+
+  await prisma.alert.create({
+    data: {
       title: "Dye-vat Temperature Envelope — DY-J800-01",
       severity: "WATCH",
       status: "new",
@@ -495,5 +539,90 @@ export async function seedDatabase(prisma: PrismaClient) {
       workOrderRef: "WO-44012",
       assetId: loomT200.id,
     },
+  });
+
+  await prisma.case.createMany({
+    data: [
+      {
+        caseCode: "CASE-9034",
+        title: "DY-J800-01 Steam Valve Overshoot",
+        description: "Hold-step temperature exceeded recipe on navy lot.",
+        priority: "High",
+        status: "In-Progress",
+        assignee: "A. Khan",
+        workOrderRef: "WO-44208",
+        assetId: dye01.id,
+      },
+      {
+        caseCode: "CASE-9040",
+        title: "AJ-T200-08 Warp Tension Check",
+        description: "Line A tension drift flagged during last two shifts.",
+        priority: "Medium",
+        status: "Open",
+        assignee: null,
+        workOrderRef: "WO-44221",
+        assetId: loomT200Healthy.id,
+      },
+      {
+        caseCode: "CASE-9044",
+        title: "SF-301C Unmonitored Frame Service",
+        description: "Critical health with no live template — release for inspection.",
+        priority: "Critical",
+        status: "Open",
+        assignee: "J. Patel",
+        workOrderRef: "WO-44233",
+        assetId: sf301c.id,
+      },
+      {
+        caseCode: "CASE-9051",
+        title: "DY-J800-02 Liquor Ratio Verify",
+        description: "Completed concentration check after valve stiction report.",
+        priority: "Medium",
+        status: "Resolved",
+        assignee: "R. Singh",
+        workOrderRef: "WO-44247",
+        assetId: dye02.id,
+      },
+      {
+        caseCode: "CASE-9058",
+        title: "AJ-T180-03 Air Circuit Leak",
+        description: "Pick-rate drop with 6 bar circuit pressure loss.",
+        priority: "High",
+        status: "In-Progress",
+        assignee: "T. Chen",
+        workOrderRef: "WO-44258",
+        assetId: loomT180.id,
+      },
+      {
+        caseCode: "CASE-9062",
+        title: "SF-301D Planned Bearing Inspect",
+        description: "Routine bearing check at 400 running hours.",
+        priority: "Low",
+        status: "Open",
+        assignee: "E. Miller",
+        workOrderRef: "WO-44266",
+        assetId: sf301d.id,
+      },
+      {
+        caseCode: "CASE-9066",
+        title: "SF-204B Alignment Follow-up",
+        description: "Released from spindle drift watch for field balance.",
+        priority: "High",
+        status: "In-Progress",
+        assignee: "E. Miller",
+        workOrderRef: "WO-44271",
+        assetId: sf204b.id,
+      },
+      {
+        caseCode: "CASE-9070",
+        title: "SF-204A Bearing Replacement Closeout",
+        description: "Envelope defect closed after spindle bearing change.",
+        priority: "Critical",
+        status: "Resolved",
+        assignee: "E. Miller",
+        workOrderRef: "WO-44188",
+        assetId: sf204a.id,
+      },
+    ],
   });
 }

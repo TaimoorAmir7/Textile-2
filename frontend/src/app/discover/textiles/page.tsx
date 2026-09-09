@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { Reveal } from "@/components/Reveal";
-import { Sparkline } from "@/components/Sparkline";
 import { StatusPill } from "@/components/StatusPill";
-import { AnalyticsData, DonutChart, HorizontalRiskChart, TrendChart } from "@/components/AnalyticsCharts";
+import { AnalyticsData, DonutChart, HorizontalRiskChart, KpiLineChart, TrendChart } from "@/components/AnalyticsCharts";
 import { ChartCard } from "@/components/DashboardUI";
 import { useChartTheme } from "@/lib/chart-theme";
+import { templateHref } from "@/components/PageTrail";
 import { apiGet } from "@/lib/api";
 
 const HERO_IMG =
@@ -30,7 +30,9 @@ type Overview = {
     openCases: number;
     closedCases: number;
     avgHealth: number;
-    avoidedDowntime: number;
+    avoidedDowntimePct: number;
+    avoidedDowntimeHrs: number;
+    potentialDowntimeHrs: number;
     maintCost: number;
   };
   plants: { id: string; name: string; code: string; healthScore: number }[];
@@ -44,33 +46,6 @@ type Overview = {
   }[];
   assets: { status: string; monitored: boolean; family: { name: string } }[];
 };
-
-const LIFECYCLE = [
-  {
-    label: "Discover",
-    body: "Explore textile asset families and reliability templates.",
-    href: "/discover/textiles/families",
-    icon: "explore",
-  },
-  {
-    label: "Deploy",
-    body: "Map template signals to mill tags and go live.",
-    href: "/discover/textiles/templates",
-    icon: "rocket_launch",
-  },
-  {
-    label: "Operate",
-    body: "Monitor health, investigate alerts, run cases.",
-    href: "/operate",
-    icon: "settings_remote",
-  },
-  {
-    label: "Optimize",
-    body: "Track MTBF, MTTR, and downtime by family.",
-    href: "/optimize",
-    icon: "query_stats",
-  },
-];
 
 export default function TextilesOverviewPage() {
   const [families, setFamilies] = useState<Family[]>([]);
@@ -87,11 +62,16 @@ export default function TextilesOverviewPage() {
   const totalAssets = data?.assets.length ?? 0;
   const atRisk = data?.assets.filter((a) => a.status !== "NOMINAL").length ?? 0;
   const solutions = families.flatMap((f) =>
-    f.useCases.map((u) => ({ ...u, family: f.name, slug: f.slug })),
+    f.useCases.map((u) => ({
+      ...u,
+      family: f.name,
+      slug: f.slug,
+      href: templateHref(f.templates, u.title) ?? `/discover/textiles/families/${f.slug}`,
+    })),
   );
 
   return (
-    <div className="space-y-5 p-5">
+    <div className="grid gap-4 p-5">
       <section className="anim-fade-up relative overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest">
         <div className="relative min-h-[260px] sm:min-h-[230px] md:min-h-52">
           <div
@@ -138,8 +118,8 @@ export default function TextilesOverviewPage() {
         </div>
       </section>
 
-      <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <Reveal delay={0}>
+      <section className="grid grid-cols-2 items-stretch gap-4 xl:grid-cols-4">
+        <Reveal delay={0} className="h-full min-w-0">
           <KpiCard
             label="Active alerts"
             icon="warning"
@@ -147,18 +127,23 @@ export default function TextilesOverviewPage() {
             value={data?.kpis.activeAlerts ?? 0}
             caption={`${data?.kpis.criticalAlerts ?? 0} critical now`}
             trend={(analytics?.series ?? []).slice(-7).map((point) => point.alerts)}
+            trendLabels={(analytics?.series ?? []).slice(-7).map((point) => point.label)}
+            seriesName="Active alerts"
           />
         </Reveal>
-        <Reveal delay={80}>
+        <Reveal delay={80} className="h-full min-w-0">
           <KpiCard
             label="Monitored assets"
             icon="precision_manufacturing"
             value={monitored}
             caption={`of ${totalAssets} mill assets`}
             trend={(analytics?.series ?? []).slice(-7).map((point) => point.health)}
+            trendLabels={(analytics?.series ?? []).slice(-7).map((point) => point.label)}
+            seriesName="Mill health"
+            seriesUnit="%"
           />
         </Reveal>
-        <Reveal delay={160}>
+        <Reveal delay={160} className="h-full min-w-0">
           <KpiCard
             label="Assets at risk"
             icon="crisis_alert"
@@ -166,50 +151,55 @@ export default function TextilesOverviewPage() {
             value={atRisk}
             caption="watch or critical health"
             trend={(analytics?.series ?? []).slice(-7).map((point) => point.critical)}
+            trendLabels={(analytics?.series ?? []).slice(-7).map((point) => point.label)}
+            seriesName="Assets at risk"
           />
         </Reveal>
-        <Reveal delay={240}>
+        <Reveal delay={240} className="h-full min-w-0">
           <KpiCard
             label="Avoided downtime"
             icon="savings"
             highlight
-            value={data?.kpis.avoidedDowntime ?? 0}
-            prefix="$"
-            caption="estimated from predictive alerts"
-            trend={(analytics?.series ?? []).slice(-7).map((point) => point.maintenanceCost)}
+            value={data?.kpis.avoidedDowntimePct ?? 0}
+            suffix="%"
+            caption={`${data?.kpis.avoidedDowntimeHrs ?? 0} h of ${data?.kpis.potentialDowntimeHrs ?? 0} h potential`}
+            trend={(analytics?.series ?? []).slice(-7).map((point) => point.health)}
+            trendLabels={(analytics?.series ?? []).slice(-7).map((point) => point.label)}
+            seriesName="Health trend"
+            seriesUnit="%"
           />
         </Reveal>
       </section>
 
       {analytics ? (
-        <section className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-12">
+        <section className="grid min-w-0 grid-cols-1 items-stretch gap-4 md:grid-cols-3">
           <ChartCard
             title="Reliability pulse"
             description="Thirty-day alert volume and average mill health"
-            className="xl:col-span-7"
+            className="h-full"
           >
             <TrendChart data={analytics.series} height={250} />
           </ChartCard>
           <ChartCard
             title="Risk by asset family"
             description="Open predictive events by textile process"
-            className="xl:col-span-3"
+            className="h-full"
           >
             <HorizontalRiskChart data={analytics.familyRisk} height={250} />
           </ChartCard>
           <ChartCard
             title="Alert mix"
             description="Current severity distribution"
-            className="xl:col-span-2"
+            className="h-full"
           >
             <DonutChart data={analytics.severity} height={250} centerLabel="Alerts" />
           </ChartCard>
         </section>
       ) : null}
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Reveal className="lg:col-span-2">
-          <div className="rounded-lg border border-outline-variant bg-surface-container-lowest">
+      <section className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+        <Reveal className="h-full min-w-0">
+          <div className="flex h-full flex-col rounded-lg border border-outline-variant bg-surface-container-lowest">
             <div className="flex items-center justify-between border-b border-outline-variant px-5 py-4">
               <h2 className="font-headline flex items-center gap-2 text-lg font-semibold text-primary">
                 <span className="pulse-dot inline-block h-2 w-2 rounded-full bg-error text-error" />
@@ -219,12 +209,12 @@ export default function TextilesOverviewPage() {
                 Alert feed
               </Link>
             </div>
-            <ul className="divide-y divide-outline-variant">
+            <ul className="flex flex-1 flex-col divide-y divide-outline-variant">
               {(data?.recentAlerts ?? []).slice(0, 5).map((a, i) => (
-                <li key={a.id} className="anim-slide-in" style={{ animationDelay: `${i * 70}ms` }}>
+                <li key={a.id} className="anim-slide-in flex-1" style={{ animationDelay: `${i * 70}ms` }}>
                   <Link
                     href={`/operate/alerts/${a.id}`}
-                    className="flex items-center justify-between gap-4 px-5 py-3 transition-colors hover:bg-surface-bright"
+                    className="flex h-full items-center justify-between gap-4 px-5 py-3 transition-colors hover:bg-surface-bright"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-on-surface">{a.title}</p>
@@ -245,12 +235,12 @@ export default function TextilesOverviewPage() {
           </div>
         </Reveal>
 
-        <Reveal delay={100}>
-          <div className="rounded-lg border border-outline-variant bg-surface-container-lowest">
+        <Reveal delay={100} className="h-full min-w-0">
+          <div className="flex h-full flex-col rounded-lg border border-outline-variant bg-surface-container-lowest">
             <div className="border-b border-outline-variant px-5 py-4">
               <h2 className="font-headline text-lg font-semibold text-primary">Mill Facilities</h2>
             </div>
-            <div className="space-y-3 p-4">
+            <div className="flex flex-1 flex-col justify-evenly gap-3 p-4">
               {(data?.plants ?? []).map((p, i) => (
                 <Link
                   key={p.id}
@@ -261,7 +251,7 @@ export default function TextilesOverviewPage() {
                     <p className="text-sm font-semibold">{p.name}</p>
                     <span className="font-data-mono text-sm">{p.healthScore}%</span>
                   </div>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-variant">
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-md bg-surface-variant">
                     <div
                       className={`bar-grow h-full ${
                         p.healthScore < 80
@@ -289,9 +279,9 @@ export default function TextilesOverviewPage() {
             </Link>
           </div>
         </Reveal>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
           {families.map((f, i) => (
-            <Reveal key={f.slug} delay={i * 90}>
+            <Reveal key={f.slug} delay={i * 90} className="h-full min-w-0">
               <Link
                 href={`/discover/textiles/families/${f.slug}`}
                 className="lift flex h-full flex-col rounded-lg border border-outline-variant bg-surface-container-lowest p-4"
@@ -319,11 +309,11 @@ export default function TextilesOverviewPage() {
             </Link>
           </div>
         </Reveal>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3">
           {solutions.slice(0, 6).map((s, i) => (
-            <Reveal key={`${s.slug}-${s.title}`} delay={i * 70}>
+            <Reveal key={`${s.slug}-${s.title}`} delay={i * 70} className="h-full min-w-0">
               <Link
-                href={`/discover/textiles/families/${s.slug}`}
+                href={s.href}
                 className="lift block h-full rounded-lg border border-outline-variant bg-surface-container-lowest p-4"
               >
                 <span className="material-symbols-outlined mb-2 text-2xl text-secondary">
@@ -347,49 +337,6 @@ export default function TextilesOverviewPage() {
           ))}
         </div>
       </section>
-
-      <section>
-        <Reveal>
-          <h2 className="font-headline mb-3 border-b border-outline-variant pb-2 text-lg font-semibold text-primary">
-            Lifecycle Workflow
-          </h2>
-        </Reveal>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-          {LIFECYCLE.map((step, i) => (
-            <Reveal key={step.label} delay={i * 90}>
-              <Link
-                href={step.href}
-                className="lift relative block h-full rounded-lg border border-outline-variant bg-surface-container-lowest p-4"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-on-primary">
-                    <span className="material-symbols-outlined text-[18px]">{step.icon}</span>
-                  </span>
-                  <span className="font-label-caps text-on-surface-variant">Step {i + 1}</span>
-                </div>
-                <h3 className="font-headline mt-3 text-base font-semibold text-primary">
-                  {step.label}
-                </h3>
-                <p className="mt-1 text-xs text-on-surface-variant">{step.body}</p>
-                {i < LIFECYCLE.length - 1 ? (
-                  <svg
-                    className="absolute top-1/2 -right-3 hidden h-4 w-6 md:block"
-                    viewBox="0 0 24 10"
-                    aria-hidden
-                  >
-                    <path
-                      d="M0,5 L22,5"
-                      className="flow-line stroke-secondary"
-                      strokeWidth="2"
-                      fill="none"
-                    />
-                  </svg>
-                ) : null}
-              </Link>
-            </Reveal>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }
@@ -400,7 +347,11 @@ function KpiCard({
   caption,
   icon,
   trend,
+  trendLabels,
+  seriesName,
+  seriesUnit = "",
   prefix = "",
+  suffix = "",
   tone,
   highlight = false,
 }: {
@@ -409,7 +360,11 @@ function KpiCard({
   caption: string;
   icon: string;
   trend: number[];
+  trendLabels?: string[];
+  seriesName: string;
+  seriesUnit?: string;
   prefix?: string;
+  suffix?: string;
   tone?: "error" | "warning";
   highlight?: boolean;
 }) {
@@ -417,7 +372,7 @@ function KpiCard({
   const stroke = highlight ? theme.onPrimary : tone === "error" ? theme.error : theme.secondary;
   return (
     <div
-      className={`lift h-full rounded-lg border p-4 ${
+      className={`flex h-full flex-col rounded-lg border p-4 ${
         highlight
           ? "border-primary-container bg-primary text-on-primary"
           : "border-outline-variant bg-surface-container-lowest"
@@ -444,13 +399,20 @@ function KpiCard({
         </span>
       </div>
       <p className="font-headline mt-2 text-2xl font-bold">
-        <AnimatedNumber value={value} prefix={prefix} />
+        <AnimatedNumber value={value} prefix={prefix} suffix={suffix} />
       </p>
       <p className={`mt-1 text-xs ${highlight ? "text-on-primary/75" : "text-on-surface-variant"}`}>
         {caption}
       </p>
-      <div className="mt-2">
-        <Sparkline points={trend} stroke={stroke} fill height={28} delay={200} />
+      <div className="mt-auto pt-3">
+        <KpiLineChart
+          points={trend}
+          labels={trendLabels}
+          color={stroke}
+          name={seriesName}
+          unit={seriesUnit}
+          height={72}
+        />
       </div>
     </div>
   );

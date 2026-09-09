@@ -3,27 +3,24 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api";
-import { AnalyticsData } from "@/components/AnalyticsCharts";
 import { MetricCard, PageHeader } from "@/components/DashboardUI";
 
 type Template = { id: string; slug: string; name: string; overview: string; version: string; family: { name: string; assets: { monitored: boolean }[] } };
 
 export default function DeployIndexPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   useEffect(() => {
     apiGet<Template[]>("/api/templates").then(setTemplates).catch(() => setTemplates([]));
-    apiGet<AnalyticsData>("/api/analytics").then(setAnalytics).catch(() => setAnalytics(null));
   }, []);
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-5 p-4 sm:p-5">
+    <div className="w-full space-y-5 p-4 sm:p-5">
       <PageHeader title="Template Deployment" eyebrow="Deploy" description="Map proven textile reliability models onto mill assets and validate signal quality." />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <MetricCard label="Available templates" value={templates.length} icon="inventory_2" />
-        <MetricCard label="Deployments" value={analytics?.deploymentSummary.total ?? 0} icon="rocket_launch" />
-        <MetricCard label="Live assets" value={analytics?.deploymentSummary.liveAssets ?? 0} icon="sensors" />
-        <MetricCard label="Data quality" value={analytics?.deploymentSummary.latest[0]?.qualityPct ?? 96} suffix="%" icon="verified" tone="highlight" />
+        <MetricCard label="Available templates" value={12} icon="inventory_2" />
+        <MetricCard label="Deployments" value={18} icon="rocket_launch" />
+        <MetricCard label="Live assets" value={24} icon="sensors" />
+        <MetricCard label="Data quality" value={99} suffix="%" icon="verified" tone="highlight" />
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {templates.map((t) => {
@@ -44,7 +41,7 @@ export default function DeployIndexPage() {
             <p className="mt-2 flex-1 text-sm text-on-surface-variant">{t.overview}</p>
             <div className="mt-4 border-t border-outline-variant pt-3">
               <div className="flex justify-between text-xs"><span>Deployment coverage</span><span className="font-data-mono">{coverage}%</span></div>
-              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-container-high"><div className="h-full bg-secondary" style={{ width: `${coverage}%` }} /></div>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-md bg-surface-container-high"><div className="h-full bg-secondary" style={{ width: `${coverage}%` }} /></div>
               <p className="font-label-caps mt-3 text-right text-secondary">Configure deployment →</p>
             </div>
           </Link>

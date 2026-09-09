@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { apiGet } from "@/lib/api";
+import { recordVisit } from "@/lib/session-history";
 import { SignalPreviewChart } from "@/components/AnalyticsCharts";
 
 type Signal = { key: string; name: string; unit: string; defaultTag: string };
@@ -27,13 +28,20 @@ export default function TemplatePage() {
     apiGet<Template>(`/api/templates/${slug}`).then(setTpl).catch(() => setTpl(null));
   }, [slug]);
 
+  useEffect(() => {
+    if (!tpl) return;
+    recordVisit({
+      href: `/discover/templates/${tpl.slug}`,
+      title: tpl.name,
+      sub: tpl.family.name,
+      icon: "inventory_2",
+    });
+  }, [tpl]);
+
   if (!tpl) return <div className="p-6 text-sm text-on-surface-variant">Loading template…</div>;
 
   return (
     <div className="space-y-4 p-6">
-      <p className="font-data-mono text-outline">
-        Discover / {tpl.family.name} / {tpl.name}
-      </p>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="font-headline text-3xl font-bold text-primary">{tpl.name}</h2>

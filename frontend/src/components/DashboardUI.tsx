@@ -1,4 +1,7 @@
+"use client";
+
 import { AnimatedNumber } from "@/components/AnimatedNumber";
+import { Reveal } from "@/components/Reveal";
 
 export function PageHeader({
   title,
@@ -49,7 +52,7 @@ export function MetricCard({
         ? "border-error/40 bg-error-container/40"
         : "border-outline-variant bg-surface-container-lowest";
   return (
-    <div className={`min-w-0 rounded-lg border p-4 ${styles}`}>
+    <div className={`card-pop min-w-0 rounded-2xl border p-4 shadow-[0_16px_40px_-24px_rgba(17,24,39,0.18)] ${styles}`}>
       <div className="flex items-start justify-between gap-2">
         <p className={`font-label-caps ${tone === "highlight" ? "text-on-primary/75" : "text-on-surface-variant"}`}>{label}</p>
         {icon ? (
@@ -81,16 +84,18 @@ export function ChartCard({
   className?: string;
 }) {
   return (
-    <section className={`min-w-0 rounded-lg border border-outline-variant bg-surface-container-lowest ${className}`}>
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-outline-variant px-4 py-3">
-        <div>
-          <h2 className="font-headline text-base font-semibold text-primary sm:text-lg">{title}</h2>
-          {description ? <p className="mt-0.5 text-xs text-on-surface-variant">{description}</p> : null}
+    <Reveal className={className}>
+      <section className="flex h-full min-w-0 flex-col rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-[0_16px_40px_-24px_rgba(17,24,39,0.18)]">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-outline-variant px-4 py-3">
+          <div>
+            <h2 className="font-headline text-base font-semibold text-primary sm:text-lg">{title}</h2>
+            {description ? <p className="mt-0.5 text-xs text-on-surface-variant">{description}</p> : null}
+          </div>
+          {action}
         </div>
-        {action}
-      </div>
-      <div className="min-w-0 p-4">{children}</div>
-    </section>
+        <div className="min-w-0 p-4">{children}</div>
+      </section>
+    </Reveal>
   );
 }
 
@@ -106,7 +111,7 @@ export function DataTableShell({
   minWidth?: number;
 }) {
   return (
-    <section className="min-w-0 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest">
+    <section className="card-pop min-w-0 overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-[0_16px_40px_-24px_rgba(17,24,39,0.18)]">
       {title || action ? (
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant px-4 py-3">
           {title ? <h2 className="font-headline text-lg font-semibold text-primary">{title}</h2> : <span />}
@@ -122,7 +127,7 @@ export function DataTableShell({
 
 export function LoadingState({ label = "Loading data…" }: { label?: string }) {
   return (
-    <div className="flex min-h-48 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-sm text-on-surface-variant">
+    <div className="flex min-h-48 items-center justify-center rounded-2xl border border-outline-variant bg-surface-container-lowest text-sm text-on-surface-variant">
       <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-outline-variant border-t-secondary" />
       {label}
     </div>
@@ -131,7 +136,7 @@ export function LoadingState({ label = "Loading data…" }: { label?: string }) 
 
 export function EmptyState({ title, detail }: { title: string; detail?: string }) {
   return (
-    <div className="flex min-h-40 flex-col items-center justify-center rounded-lg border border-dashed border-outline-variant p-6 text-center">
+    <div className="flex min-h-40 flex-col items-center justify-center rounded-2xl border border-dashed border-outline-variant p-6 text-center">
       <span className="material-symbols-outlined mb-2 text-3xl text-outline">monitoring</span>
       <p className="font-semibold">{title}</p>
       {detail ? <p className="mt-1 max-w-md text-sm text-on-surface-variant">{detail}</p> : null}

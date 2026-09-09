@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { StatusPill } from "@/components/StatusPill";
 import { apiGet } from "@/lib/api";
-import { AnalyticsData, HealthGauge, HorizontalRiskChart, TrendChart } from "@/components/AnalyticsCharts";
-import { ChartCard, DataTableShell, LoadingState, MetricCard, PageHeader } from "@/components/DashboardUI";
+import { AnalyticsData, DonutChart, HealthGauge, HorizontalRiskChart, KpiLineChart, TrendChart } from "@/components/AnalyticsCharts";
+import { ChartCard, DataTableShell, LoadingState, PageHeader } from "@/components/DashboardUI";
+import { useChartTheme } from "@/lib/chart-theme";
 
 type Overview = {
   kpis: {
@@ -13,8 +14,9 @@ type Overview = {
     criticalAlerts: number;
     openCases: number;
     closedCases: number;
-    avoidedDowntime: number;
-    maintCost: number;
+    avoidedDowntimePct: number;
+    avoidedDowntimeHrs: number;
+    potentialDowntimeHrs: number;
     avgHealth: number;
   };
   plants: { id: string; name: string; code: string; healthScore: number }[];
@@ -37,20 +39,57 @@ export default function OperatePage() {
     apiGet<AnalyticsData>("/api/analytics?days=30").then(setAnalytics).catch(() => setAnalytics(null));
   }, []);
 
+  const theme = useChartTheme();
+  const recent = (analytics?.series ?? []).slice(-7);
+  const labels = recent.map((point) => point.label);
+
   if (!data) return <div className="p-5"><LoadingState label="Loading operations dashboard…" /></div>;
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-5 p-4 sm:p-5">
+    <div className="w-full space-y-5 p-4 sm:p-5">
       <PageHeader
-        title="Operations Command Center"
-        eyebrow="Textile reliability"
-        description="Live reliability posture across spinning, weaving, and dyeing facilities."
+        title="Operations Dashboard"
+        eyebrow="Operate"
+        description="Mill posture first, then alerts, cases, and work orders in that order."
       />
-      <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <MetricCard label="Active alerts" value={data.kpis.activeAlerts} caption={`${data.kpis.criticalAlerts} critical`} icon="warning" tone="critical" />
-        <MetricCard label="Average health" value={data.kpis.avgHealth} suffix="%" caption="Across monitored assets" icon="monitor_heart" />
-        <MetricCard label="Maintenance cost" value={data.kpis.maintCost} prefix="$" caption="Current reporting period" icon="payments" />
-        <MetricCard label="Avoided downtime" value={data.kpis.avoidedDowntime} prefix="$" caption="Estimated production value" icon="savings" tone="highlight" />
+      <section className="grid grid-cols-2 items-stretch gap-4 xl:grid-cols-4">
+        <KpiChartCard label="Active alerts" caption={`${data.kpis.criticalAlerts} critical`} icon="warning" tone="critical">
+          <KpiLineChart
+            points={recent.length ? recent.map((point) => point.alerts) : [data.kpis.activeAlerts]}
+            labels={labels}
+            color={theme.error}
+            name="Active alerts"
+            height={88}
+          />
+        </KpiChartCard>
+        <KpiChartCard label="Average health" caption="Across monitored assets" icon="monitor_heart">
+          <HealthGauge value={data.kpis.avgHealth} height={120} />
+        </KpiChartCard>
+        <KpiChartCard
+          label="Avoided downtime"
+          caption={`${data.kpis.avoidedDowntimeHrs} h saved of ${data.kpis.potentialDowntimeHrs} h potential`}
+          icon="savings"
+          tone="highlight"
+        >
+          <KpiLineChart
+            points={recent.length ? recent.map((point) => point.health) : [data.kpis.avoidedDowntimePct]}
+            labels={labels}
+            color={theme.onPrimary}
+            name="Avoided downtime"
+            unit="%"
+            height={88}
+          />
+        </KpiChartCard>
+        <KpiChartCard label="Open cases" caption={`${data.kpis.closedCases} resolved`} icon="assignment">
+          <DonutChart
+            data={[
+              { name: "Open", value: data.kpis.openCases },
+              { name: "Resolved", value: data.kpis.closedCases },
+            ]}
+            height={150}
+            centerLabel="Cases"
+          />
+        </KpiChartCard>
       </section>
 
       {analytics ? (
@@ -117,6 +156,43 @@ export default function OperatePage() {
           </tbody>
         </table>
       </DataTableShell>
+    </div>
+  );
+}
+
+function KpiChartCard({
+  label,
+  caption,
+  icon,
+  tone = "default",
+  children,
+}: {
+  label: string;
+  caption: string;
+  icon: string;
+  tone?: "default" | "critical" | "highlight";
+  children: ReactNode;
+}) {
+  const styles =
+    tone === "highlight"
+      ? "border-primary-container bg-primary text-on-primary"
+      : tone === "critical"
+        ? "border-error/40 bg-error-container/40"
+        : "border-outline-variant bg-surface-container-lowest";
+  return (
+    <div className={`flex h-full min-w-0 flex-col rounded-2xl border p-4 ${styles}`}>
+      <div className="flex items-start justify-between gap-2">
+        <p className={`font-label-caps ${tone === "highlight" ? "text-on-primary/75" : "text-on-surface-variant"}`}>{label}</p>
+        <span
+          className={`material-symbols-outlined text-[18px] ${
+            tone === "critical" ? "text-error" : tone === "highlight" ? "text-on-primary/75" : "text-secondary"
+          }`}
+        >
+          {icon}
+        </span>
+      </div>
+      <p className={`mt-1 text-xs ${tone === "highlight" ? "text-on-primary/75" : "text-on-surface-variant"}`}>{caption}</p>
+      <div className="mt-2 min-w-0 flex-1">{children}</div>
     </div>
   );
 }

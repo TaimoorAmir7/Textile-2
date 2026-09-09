@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
+import { RecentlyViewed } from "@/components/RecentlyViewed";
 
 const FEATURED_IMG =
   "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=1200&q=60";
@@ -15,7 +16,7 @@ const PWR_IMG =
 export default function DiscoverPage() {
   return (
     <div className="p-4">
-      <div className="mx-auto max-w-[1600px] space-y-4">
+      <div className="w-full space-y-4">
         <div className="anim-fade-up">
           <h2 className="font-headline text-[32px] leading-10 font-bold text-primary">
             Discover Industries
@@ -32,10 +33,11 @@ export default function DiscoverPage() {
               <h3 className="mb-2 font-headline text-lg font-semibold text-on-surface">
                 Highlighted Vertical
               </h3>
-              <Link
-                href="/discover/textiles"
-                className="lift group relative flex flex-col overflow-hidden rounded border border-outline-variant bg-surface-container-lowest md:flex-row"
-              >
+              <div className="lift group overflow-hidden rounded border border-outline-variant bg-surface-container-lowest">
+                <Link
+                  href="/discover/textiles"
+                  className="relative flex flex-col md:flex-row"
+                >
                 <div className="relative h-40 overflow-hidden border-r border-outline-variant md:h-auto md:w-1/3">
                   <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
@@ -52,7 +54,6 @@ export default function DiscoverPage() {
                   </div>
                 </div>
                 <div className="flex flex-1 flex-col justify-between p-4">
-                  <div>
                     <p className="mb-4 text-sm text-on-surface-variant">
                       Advanced monitoring templates for high-speed spinning machines, industrial
                       looms, and dye vats to minimize yarn breakage and ensure continuous production
@@ -72,25 +73,24 @@ export default function DiscoverPage() {
                         <span className="font-data-mono text-base text-primary">Spinning Mchn V2</span>
                       </div>
                     </div>
-                  </div>
-                  <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant pt-3">
-                    <div>
-                      <span className="font-label-caps mr-1 text-on-surface-variant">
-                        Popular solutions:
-                      </span>
-                      <span className="text-sm font-medium text-primary">
-                        Loom Vibration Analysis
-                      </span>
-                    </div>
-                    <span className="font-label-caps flex items-center gap-1 text-secondary group-hover:underline">
+                    <span className="font-label-caps mt-auto flex items-center gap-1 text-secondary group-hover:underline">
                       View catalog
                       <span className="material-symbols-outlined text-[14px] transition-transform group-hover:translate-x-1">
                         arrow_forward
                       </span>
                     </span>
-                  </div>
                 </div>
-              </Link>
+                </Link>
+                <div className="flex flex-wrap items-center gap-2 border-t border-outline-variant px-4 py-3">
+                  <span className="font-label-caps text-on-surface-variant">Popular solutions:</span>
+                  <Link
+                    href="/discover/templates/loom-vibration-analysis"
+                    className="text-sm font-medium text-primary hover:underline"
+                  >
+                    Loom Vibration Analysis
+                  </Link>
+                </div>
+              </div>
             </section>
 
             <section>
@@ -133,33 +133,7 @@ export default function DiscoverPage() {
           </div>
 
           <aside className="col-span-12 hidden space-y-4 pl-2 xl:col-span-3 xl:block">
-            <div className="sticky top-4 rounded border border-outline-variant bg-surface-container-lowest p-4">
-              <h3 className="mb-3 flex items-center gap-2 font-headline text-lg font-semibold text-primary">
-                <span className="material-symbols-outlined text-[18px] text-secondary">history</span>
-                Recently Viewed
-              </h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href="/discover/textiles/families/air-jet-looms"
-                    className="group block rounded border border-outline-variant p-2 hover:border-secondary"
-                  >
-                    <RecentRow icon="precision_manufacturing" title="High-Speed Loom T-200" sub="Textiles & Apparel" />
-                  </Link>
-                </li>
-                <li>
-                  <div className="rounded border border-outline-variant p-2 opacity-80">
-                    <RecentRow icon="water_drop" title="Centrifugal Pump C-Series" sub="Oil & Gas" />
-                  </div>
-                </li>
-                <li>
-                  <div className="rounded border border-outline-variant p-2 opacity-80">
-                    <RecentRow icon="hvac" title="Industrial Chiller Unit" sub="Facilities" />
-                  </div>
-                </li>
-              </ul>
-              <p className="font-label-caps mt-3 text-center text-on-surface-variant">Session history</p>
-            </div>
+            <RecentlyViewed />
           </aside>
         </div>
       </div>
@@ -204,16 +178,3 @@ function CatalogCard({
   );
 }
 
-function RecentRow({ icon, title, sub }: { icon: string; title: string; sub: string }) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-outline-variant bg-surface-container-high">
-        <span className="material-symbols-outlined text-[16px] text-on-surface-variant">{icon}</span>
-      </div>
-      <div className="min-w-0">
-        <h4 className="truncate text-sm font-medium text-on-surface">{title}</h4>
-        <p className="font-label-caps mt-0.5 truncate text-on-surface-variant">{sub}</p>
-      </div>
-    </div>
-  );
-}

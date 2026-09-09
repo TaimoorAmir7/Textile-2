@@ -20,9 +20,18 @@ type Row = {
 export default function OptimizePage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [avoidedPct, setAvoidedPct] = useState(0);
   const [days, setDays] = useState(30);
   useEffect(() => {
-    apiGet<Row[]>("/api/optimize").then(setRows).catch(() => setRows([]));
+    apiGet<{ rows: Row[]; avoidedPct: number }>(`/api/optimize?days=${days}`)
+      .then((data) => {
+        setRows(data.rows ?? []);
+        setAvoidedPct(data.avoidedPct ?? 0);
+      })
+      .catch(() => {
+        setRows([]);
+        setAvoidedPct(0);
+      });
     apiGet<AnalyticsData>(`/api/analytics?days=${days}`).then(setAnalytics).catch(() => setAnalytics(null));
   }, [days]);
 
@@ -44,7 +53,7 @@ export default function OptimizePage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-5 p-4 sm:p-5">
+    <div className="w-full space-y-5 p-4 sm:p-5">
       <PageHeader
         title="Reliability Optimization"
         eyebrow="Optimize"
@@ -64,14 +73,24 @@ export default function OptimizePage() {
         <MetricCard label="Average MTBF" value={Math.round(rows.reduce((sum, row) => sum + row.mtbf, 0) / Math.max(rows.length, 1))} suffix=" h" icon="schedule" />
         <MetricCard label="Average MTTR" value={Number((rows.reduce((sum, row) => sum + row.mttr, 0) / Math.max(rows.length, 1)).toFixed(1))} suffix=" h" icon="build" />
         <MetricCard label="Downtime" value={Number(rows.reduce((sum, row) => sum + row.downtimeHrs, 0).toFixed(1))} suffix=" h" icon="factory" tone="critical" />
-        <MetricCard label="Average health" value={Math.round(rows.reduce((sum, row) => sum + row.avgHealth, 0) / Math.max(rows.length, 1))} suffix="%" icon="monitor_heart" tone="highlight" />
+        <MetricCard
+          label="Avoided downtime"
+          value={avoidedPct}
+          suffix="%"
+          caption="Share of potential interruption kept online"
+          icon="savings"
+          tone="highlight"
+        />
       </div>
       <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2">
         <ChartCard title="MTBF, MTTR, and downtime" description="Reliability and repair performance by family">
           <ReliabilityChart data={rows} />
         </ChartCard>
-        <ChartCard title="Health versus maintenance cost" description="Bubble size represents alert exposure">
-          <CostHealthScatter data={rows.map((row) => ({ name: row.name, health: row.avgHealth, cost: Math.round(row.downtimeHrs * 4200 + row.cases * 1800), alerts: row.alerts }))} />
+        <ChartCard title="Health versus downtime share" description="Bubble size is alert count; vertical axis is each family's share of mill downtime">
+          <CostHealthScatter data={rows.map((row) => {
+            const totalDowntime = rows.reduce((sum, item) => sum + item.downtimeHrs, 0) || 1;
+            return { name: row.name.replace(/\s*Family$/i, ""), health: row.avgHealth, cost: Math.round((row.downtimeHrs / totalDowntime) * 100), alerts: row.alerts };
+          })} />
         </ChartCard>
       </div>
       {analytics ? (

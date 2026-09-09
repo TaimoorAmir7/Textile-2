@@ -3,31 +3,31 @@
 import { useEffect, useState } from "react";
 
 const TOKENS = {
-  grid: "--color-outline-variant",
-  axis: "--color-on-surface-variant",
-  primary: "--color-primary",
-  onPrimary: "--color-on-primary",
-  secondary: "--color-secondary",
-  error: "--color-error",
-  warning: "--color-warning",
-  track: "--color-surface-container-high",
-  surface: "--color-surface-container-lowest",
-  onSurface: "--color-on-surface",
+  grid: "--spark-outline-variant",
+  axis: "--spark-on-surface-variant",
+  primary: "--spark-primary",
+  onPrimary: "--spark-on-primary",
+  secondary: "--spark-secondary",
+  error: "--spark-error",
+  warning: "--spark-warning",
+  track: "--spark-surface-container-high",
+  surface: "--spark-surface-container-lowest",
+  onSurface: "--spark-on-surface",
 } as const;
 
 export type ChartTheme = Record<keyof typeof TOKENS, string>;
 
 const FALLBACK: ChartTheme = {
-  grid: "#c4c6cf",
-  axis: "#44474e",
-  primary: "#002046",
+  grid: "#e5e7eb",
+  axis: "#4b5563",
+  primary: "#1f2937",
   onPrimary: "#ffffff",
-  secondary: "#006a6a",
-  error: "#ba1a1a",
-  warning: "#ffa000",
-  track: "#e5e9eb",
+  secondary: "#0f766e",
+  error: "#dc2626",
+  warning: "#d97706",
+  track: "#e5e7eb",
   surface: "#ffffff",
-  onSurface: "#181c1e",
+  onSurface: "#111827",
 };
 
 /**

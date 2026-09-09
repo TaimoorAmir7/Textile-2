@@ -60,7 +60,7 @@ export default function TemplateLibraryPage() {
                   <p className="font-label-caps mb-1 text-on-surface-variant">
                     Deployment coverage
                   </p>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-surface-variant">
+                  <div className="h-1.5 overflow-hidden rounded-md bg-surface-variant">
                     <div
                       className="bar-grow h-full bg-secondary"
                       style={{ width: `${coverage}%`, animationDelay: `${i * 120}ms` }}

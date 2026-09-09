@@ -53,7 +53,7 @@ export function AlertTicker() {
             >
               <span
                 className={`h-1.5 w-1.5 rounded-full ${
-                  a.severity === "CRITICAL" ? "bg-error" : "bg-warning"
+                  a.severity === "CRITICAL" ? "bg-error" : a.severity === "WATCH" ? "bg-warning" : "bg-secondary"
                 }`}
               />
               <span className="font-data-mono text-inverse-on-surface">{a.asset.assetCode}</span>

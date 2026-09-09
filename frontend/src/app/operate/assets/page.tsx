@@ -43,7 +43,7 @@ function AssetsInner() {
     .sort((a, b) => a.healthScore - b.healthScore);
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-5 p-4 sm:p-5">
+    <div className="w-full space-y-5 p-4 sm:p-5">
       <PageHeader title="Asset Explorer" eyebrow="Operate" description="Health, monitoring coverage, and operational context for textile machinery." />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <MetricCard label="Assets" value={rows.length} icon="precision_manufacturing" />

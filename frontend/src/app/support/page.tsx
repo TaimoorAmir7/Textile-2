@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/DashboardUI";
 
 export default function SupportPage() {
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
+    <div className="w-full space-y-6 p-4 sm:p-6">
       <PageHeader title="Reliability Support" eyebrow="Help center" description="Guided pathways for platform, template, and maintenance workflow questions." />
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <SupportCard icon="menu_book" title="Platform walkthrough" detail="Follow the complete reliability lifecycle from industry discovery to optimization." href="/discover/textiles" action="Start walkthrough" />

@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
     periodDays: days,
     generatedAt: new Date().toISOString(),
     series,
-    severity: countBy(alerts.map((alert) => alert.severity), ["CRITICAL", "WATCH"]),
+    severity: countBy(alerts.map((alert) => alert.severity), ["CRITICAL", "WATCH", "NOMINAL"]),
     alertStatus: countBy(alerts.map((alert) => alert.status), ["new", "acked", "snoozed"]),
     caseStatus: countBy(cases.map((item) => item.status), ["Open", "In-Progress", "Resolved"]),
     casePriority: countBy(cases.map((item) => item.priority), ["Critical", "High", "Medium", "Low"]),

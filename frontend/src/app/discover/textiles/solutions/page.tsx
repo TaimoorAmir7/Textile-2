@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Reveal } from "@/components/Reveal";
+import { templateHref } from "@/components/PageTrail";
 import { apiGet } from "@/lib/api";
 
 type Family = {
@@ -57,7 +58,7 @@ export default function SolutionsPage() {
             {f.useCases.map((u, i) => (
               <Reveal key={u.title} delay={i * 80}>
                 <div className="lift group relative h-full overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest p-4">
-                  <div className="absolute -top-6 -right-6 h-16 w-16 rounded-full bg-surface-container-low transition-colors group-hover:bg-secondary-fixed" />
+                  <div className="absolute -top-6 -right-6 h-16 w-16 rounded-xl bg-surface-container-low transition-colors group-hover:bg-secondary-fixed" />
                   <span className="material-symbols-outlined relative mb-2 text-2xl text-secondary">
                     {u.icon}
                   </span>
@@ -84,9 +85,9 @@ export default function SolutionsPage() {
                     >
                       Family
                     </Link>
-                    {f.templates[0] ? (
+                    {(templateHref(f.templates, u.title) ?? (f.templates[0] ? `/discover/templates/${f.templates[0].slug}` : null)) ? (
                       <Link
-                        href={`/discover/templates/${f.templates[0].slug}`}
+                        href={templateHref(f.templates, u.title) ?? `/discover/templates/${f.templates[0].slug}`}
                         className="font-label-caps text-secondary hover:underline"
                       >
                         Template

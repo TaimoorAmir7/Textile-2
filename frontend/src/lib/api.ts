@@ -24,6 +24,7 @@ function parse(path: string) {
   return new URL(path, "http://local.catalog");
 }
 
+/** Paths look like /api/... but they only read the in-browser mill catalog. */
 export function readCatalog<T>(path: string): T {
   const url = parse(path);
   const route = url.pathname;

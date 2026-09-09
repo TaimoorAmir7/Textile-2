@@ -109,8 +109,11 @@ function series(points: number, start: number, drift: number, spikeAt?: number) 
   return data;
 }
 
+/** Frozen clock so the demo snapshot matches on the server and in the browser. */
+export const DEMO_NOW = new Date("2026-09-09T08:00:00.000Z");
+
 function ago(ms: number) {
-  return new Date(Date.now() - ms);
+  return new Date(DEMO_NOW.getTime() - ms);
 }
 
 export function buildMillSnapshot(): MillSnapshot {

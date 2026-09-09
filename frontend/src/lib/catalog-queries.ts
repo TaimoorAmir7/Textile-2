@@ -9,6 +9,7 @@ import {
   listPlants,
   templatesForSearch,
 } from "./catalog";
+import { DEMO_NOW } from "./mill-data";
 
 export function buildOverview() {
   const plants = listPlants();
@@ -57,14 +58,14 @@ export function buildAnalytics(requested = 30) {
 
   const baseHealth = assets.reduce((sum, asset) => sum + asset.healthScore, 0) / Math.max(assets.length, 1);
   const series = Array.from({ length: days }, (_, index) => {
-    const date = new Date();
-    date.setHours(0, 0, 0, 0);
-    date.setDate(date.getDate() - (days - index - 1));
+    const date = new Date(DEMO_NOW);
+    date.setUTCHours(0, 0, 0, 0);
+    date.setUTCDate(date.getUTCDate() - (days - index - 1));
     const wave = Math.sin(index * 0.72) + Math.cos(index * 0.31) * 0.65;
     const alertVolume = Math.max(0, Math.round(alerts.length / 2 + wave + (index % 9 === 0 ? 2 : 0)));
     return {
       date: date.toISOString(),
-      label: date.toLocaleDateString("en", { month: "short", day: "numeric" }),
+      label: date.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" }),
       alerts: alertVolume,
       critical: Math.min(alertVolume, index % 6 === 0 ? 2 : index % 3 === 0 ? 1 : 0),
       health: Number(Math.max(65, Math.min(99, baseHealth + wave * 1.6 + index * 0.04)).toFixed(1)),
@@ -114,7 +115,7 @@ export function buildAnalytics(requested = 30) {
 
   return {
     periodDays: days,
-    generatedAt: new Date().toISOString(),
+    generatedAt: DEMO_NOW.toISOString(),
     series,
     severity: countBy(
       alerts.map((alert) => alert.severity),
@@ -157,7 +158,7 @@ export function buildAnalytics(requested = 30) {
 
 export function buildOptimize(requested = 30) {
   const days = requested === 7 || requested === 90 ? requested : 30;
-  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  const since = new Date(DEMO_NOW.getTime() - days * 24 * 60 * 60 * 1000);
   const families = familiesForOptimize();
 
   const rows = families.map((family) => {

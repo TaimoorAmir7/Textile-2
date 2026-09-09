@@ -4,35 +4,23 @@ Textile asset reliability demo (C3-style Discover → Deploy → Operate → Opt
 
 ## Stack
 
-- **Next.js 15** (App Router) UI + Route Handlers
-- **Prisma** + **SQLite** locally; **Neon Postgres** on Vercel for shared persistence
-- One Vercel project; set `DATABASE_URL` to Neon after switching the Prisma provider to `postgresql` (see below)
+- **Next.js 15** (App Router) UI
+- Hardcoded mill catalog in `src/lib/mill-data.ts` — no database and no HTTP API
+- Deploy / Acknowledge / Cases stay in the browser session only
 
 ## Local
 
 ```bash
 cd frontend
-cp .env.example .env
 npm install
-npx prisma generate
-npx prisma db push
-npx prisma db seed
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) (redirects to `/discover`).
 
-Optional: `docker compose up -d` with `provider = "postgresql"` if you prefer Postgres locally.
+## Railway / Vercel
 
-## Vercel
-
-SQLite will not persist on Vercel’s serverless filesystem. For the demo to share Deploy / Acknowledge / Cases across visitors:
-
-1. Create a [Neon](https://neon.tech) project and copy the pooled connection string.
-2. In `prisma/schema.prisma`, set `provider = "postgresql"`.
-3. In Vercel, import this repo, **Root Directory** `frontend`.
-4. Set `DATABASE_URL` to the Neon URL (`sslmode=require`).
-5. Deploy. Empty databases are auto-seeded on first API request.
+Set the service **Root Directory** to `frontend`. No `DATABASE_URL` or Prisma step is required.
 
 ## Working path
 

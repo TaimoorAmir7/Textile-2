@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { apiGet } from "@/lib/api";
 
 type Hit = { title: string; sub: string; href: string; icon: string };
 type Group = { group: string; items: Hit[] };
@@ -16,8 +17,7 @@ export function SearchBox() {
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
-      fetch(`/api/search?q=${encodeURIComponent(query.trim())}`)
-        .then((response) => (response.ok ? response.json() : { groups: [] }))
+      apiGet<{ groups: Group[] }>(`/api/search?q=${encodeURIComponent(query.trim())}`)
         .then((data) => {
           setGroups(data.groups ?? []);
           setActive(0);

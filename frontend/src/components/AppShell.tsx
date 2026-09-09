@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BackButton, isSubPage, rememberPath } from "@/components/PageTrail";
 import { SearchBox } from "@/components/SearchBox";
+import { apiGet } from "@/lib/api";
 import { headerCrumbs, subscribeHeaderCrumbs } from "@/lib/header-path";
 import { describePath, recordVisit } from "@/lib/session-history";
 
@@ -37,11 +38,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    fetch("/api/overview")
-      .then((r) => (r.ok ? r.json() : null))
+    apiGet<{
+      criticalAlerts?: number;
+      kpis?: { criticalAlerts: number };
+      plants: { id: string; name: string; code: string }[];
+    }>("/api/overview")
       .then((d) => {
-        if (d?.criticalAlerts != null) setCriticalCount(d.criticalAlerts);
-        if (d?.plants) setPlants(d.plants);
+        setCriticalCount(d.kpis?.criticalAlerts ?? d.criticalAlerts ?? 0);
+        if (d.plants) setPlants(d.plants);
       })
       .catch(() => undefined);
   }, [pathname]);

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { apiGet } from "@/lib/api";
 
 type TickerAlert = {
   id: string;
@@ -17,9 +18,8 @@ export function AlertTicker() {
   useEffect(() => {
     let cancelled = false;
     function load() {
-      fetch("/api/alerts", { cache: "no-store" })
-        .then((r) => (r.ok ? r.json() : []))
-        .then((rows: TickerAlert[]) => {
+      apiGet<TickerAlert[]>("/api/alerts")
+        .then((rows) => {
           if (!cancelled) setAlerts(rows.filter((a) => a.status !== "snoozed"));
         })
         .catch(() => undefined);

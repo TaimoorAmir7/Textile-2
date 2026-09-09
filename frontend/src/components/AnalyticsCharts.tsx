@@ -68,6 +68,21 @@ type TooltipItem = {
   payload?: Record<string, unknown>;
 };
 
+type ChartMouseState = {
+  activeLabel?: string | number;
+  activePayload?: TooltipItem[];
+};
+
+function hoverFromChartMouse(state: unknown) {
+  const event = state as ChartMouseState | null | undefined;
+  const item = event?.activePayload?.[0];
+  if (!item) return null;
+  return {
+    label: String(event?.activeLabel ?? item.payload?.label ?? ""),
+    value: Number(item.value),
+  };
+}
+
 export function InfoTooltip({
   active,
   payload,
@@ -236,13 +251,13 @@ export function KpiLineChart({
           data={data}
           margin={{ top: 10, right: 8, left: 8, bottom: 4 }}
           onMouseMove={(state) => {
-            const item = state?.activePayload?.[0];
-            if (!item) return;
+            const next = hoverFromChartMouse(state);
+            if (!next) return;
             setHover((current) => ({
               x: current?.x ?? 0,
               y: current?.y ?? 0,
-              label: String(state.activeLabel ?? item.payload?.label ?? ""),
-              value: Number(item.value),
+              label: next.label,
+              value: next.value,
             }));
           }}
         >

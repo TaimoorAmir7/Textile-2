@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { ensureSeeded } from "@/lib/ensure-seed";
-import { prisma } from "@/lib/prisma";
+import { updateCase } from "@/lib/catalog";
 
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  await ensureSeeded();
   const { id } = await params;
   const body = (await req.json()) as {
     status?: string;
@@ -14,14 +12,7 @@ export async function PATCH(
     workOrderRef?: string;
     priority?: string;
   };
-  const updated = await prisma.case.update({
-    where: { id },
-    data: {
-      ...(body.status ? { status: body.status } : {}),
-      ...(body.assignee !== undefined ? { assignee: body.assignee || null } : {}),
-      ...(body.workOrderRef !== undefined ? { workOrderRef: body.workOrderRef || null } : {}),
-      ...(body.priority ? { priority: body.priority } : {}),
-    },
-  });
+  const updated = updateCase(id, body);
+  if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(updated);
 }

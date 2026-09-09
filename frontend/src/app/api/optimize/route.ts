@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ensureSeeded } from "@/lib/ensure-seed";
-import { prisma } from "@/lib/prisma";
+import { familiesForOptimize } from "@/lib/catalog";
 
 function periodDays(requested: number) {
   return requested === 7 || requested === 90 ? requested : 30;
@@ -12,12 +11,9 @@ function mix(slug: string, days: number) {
 }
 
 export async function GET(request: NextRequest) {
-  await ensureSeeded();
   const days = periodDays(Number(request.nextUrl.searchParams.get("days") ?? 30));
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-  const families = await prisma.assetFamily.findMany({
-    include: { assets: { include: { alerts: true, cases: true } } },
-  });
+  const families = familiesForOptimize();
 
   const rows = families.map((family) => {
     const assets = family.assets.length;

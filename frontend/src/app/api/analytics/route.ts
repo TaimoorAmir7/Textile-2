@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ensureSeeded } from "@/lib/ensure-seed";
-import { prisma } from "@/lib/prisma";
+import { listAlerts, listAssets, listCases, listDeployments, listPlants } from "@/lib/catalog";
 
 export async function GET(request: NextRequest) {
-  await ensureSeeded();
   const requested = Number(request.nextUrl.searchParams.get("days") ?? 30);
   const days = requested === 7 || requested === 90 ? requested : 30;
-  const [plants, assets, alerts, cases, deployments] = await Promise.all([
-    prisma.plant.findMany({ orderBy: { name: "asc" } }),
-    prisma.asset.findMany({ include: { family: true, alerts: true, cases: true } }),
-    prisma.alert.findMany({ include: { asset: { include: { family: true, plant: true } } } }),
-    prisma.case.findMany(),
-    prisma.deployment.findMany({ include: { assets: true }, orderBy: { createdAt: "desc" } }),
-  ]);
+  const plants = listPlants();
+  const assets = listAssets();
+  const alerts = listAlerts();
+  const cases = listCases();
+  const deployments = listDeployments();
 
   const baseHealth = assets.reduce((sum, asset) => sum + asset.healthScore, 0) / Math.max(assets.length, 1);
   const series = Array.from({ length: days }, (_, index) => {

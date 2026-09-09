@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ensureSeeded } from "@/lib/ensure-seed";
-import { prisma } from "@/lib/prisma";
+import { assetsForSearch, listAlerts, listFamilies, templatesForSearch } from "@/lib/catalog";
 
 type Hit = { title: string; sub: string; href: string; icon: string; group: string };
 
@@ -9,14 +8,11 @@ function match(query: string, ...values: string[]) {
 }
 
 export async function GET(request: NextRequest) {
-  await ensureSeeded();
   const q = (request.nextUrl.searchParams.get("q") ?? "").trim().toLowerCase();
-  const [assets, families, templates, alerts] = await Promise.all([
-    prisma.asset.findMany({ include: { plant: true, family: true } }),
-    prisma.assetFamily.findMany({ include: { templates: true } }),
-    prisma.reliabilityTemplate.findMany({ include: { family: true } }),
-    prisma.alert.findMany({ include: { asset: true }, take: 24, orderBy: { detectedAt: "desc" } }),
-  ]);
+  const assets = assetsForSearch();
+  const families = listFamilies();
+  const templates = templatesForSearch();
+  const alerts = listAlerts().slice(0, 24);
 
   const pages: Hit[] = [
     { title: "Textiles & Apparel", sub: "Industry catalog", href: "/discover/textiles", icon: "apparel", group: "Pages" },

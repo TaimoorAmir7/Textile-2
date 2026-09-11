@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useMill } from "@/lib/use-mill";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { Reveal } from "@/components/Reveal";
-import { StatusPill } from "@/components/StatusPill";
 import { AnalyticsData, DonutChart, HorizontalRiskChart, KpiLineChart, TrendChart } from "@/components/AnalyticsCharts";
 import { ChartCard } from "@/components/DashboardUI";
 import { useChartTheme } from "@/lib/chart-theme";
-import { templateHref } from "@/components/PageTrail";
+import { AI_MODULES } from "@/lib/ai-modules";
+import { STAGES } from "@/lib/production-data";
 
 const HERO_IMG =
   "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=1600&q=60";
@@ -35,14 +35,6 @@ type Overview = {
     maintCost: number;
   };
   plants: { id: string; name: string; code: string; healthScore: number }[];
-  recentAlerts: {
-    id: string;
-    title: string;
-    severity: string;
-    status: string;
-    detectedAt: string;
-    asset: { assetCode: string; plant: { name: string } };
-  }[];
   assets: { status: string; monitored: boolean; family: { name: string } }[];
 };
 
@@ -54,14 +46,6 @@ export default function TextilesOverviewPage() {
   const monitored = data.assets.filter((a) => a.monitored).length;
   const totalAssets = data.assets.length;
   const atRisk = data.assets.filter((a) => a.status !== "NOMINAL").length;
-  const solutions = families.flatMap((f) =>
-    f.useCases.map((u) => ({
-      ...u,
-      family: f.name,
-      slug: f.slug,
-      href: templateHref(f.templates, u.title) ?? `/discover/textiles/families/${f.slug}`,
-    })),
-  );
 
   return (
     <div className="grid gap-4 p-5">
@@ -80,15 +64,15 @@ export default function TextilesOverviewPage() {
               className="anim-fade-up font-headline text-2xl font-bold md:text-3xl"
               style={{ animationDelay: "90ms" }}
             >
-              Textiles &amp; Apparel Reliability
+              Textiles &amp; Apparel Production Reliability
             </h1>
             <p
-              className="anim-fade-up mt-1.5 max-w-3xl text-sm text-inverse-on-surface"
+              className="anim-fade-up mt-1.5 max-w-3xl text-sm text-white/85"
               style={{ animationDelay: "160ms" }}
             >
-              Predictive reliability for spinning frames, air-jet looms, and dye vats at the
-              Faisalabad mill. Deploy a template, then operate alerts, cases, and work orders from a
-              single workspace.
+              Production-quality reliability for Woven and Knit / Hosiery fabric. Follow every lot
+              through six controlled stages, investigate fabric disturbances, and coordinate alerts
+              and quality actions from one workspace.
             </p>
             <div
               className="anim-fade-up mt-4 flex flex-wrap gap-3"
@@ -98,7 +82,7 @@ export default function TextilesOverviewPage() {
                 href="/discover/textiles/templates"
                 className="lift sheen rounded bg-secondary px-4 py-2 font-label-caps text-on-secondary"
               >
-                Deploy a template
+                Browse stage templates
               </Link>
               <Link
                 href="/operate"
@@ -114,35 +98,35 @@ export default function TextilesOverviewPage() {
       <section className="grid grid-cols-2 items-stretch gap-4 xl:grid-cols-4">
         <Reveal delay={0} className="h-full min-w-0">
           <KpiCard
-            label="Active alerts"
+            label="Quality alerts"
             icon="warning"
             tone="error"
             value={data.kpis.activeAlerts}
             caption={`${data.kpis.criticalAlerts} critical now`}
             trend={analytics.series.slice(-7).map((point) => point.alerts)}
             trendLabels={analytics.series.slice(-7).map((point) => point.label)}
-            seriesName="Active alerts"
+            seriesName="Quality alerts"
           />
         </Reveal>
         <Reveal delay={80} className="h-full min-w-0">
           <KpiCard
-            label="Monitored assets"
+            label="Controlled stages"
             icon="precision_manufacturing"
             value={monitored}
-            caption={`of ${totalAssets} mill assets`}
+            caption={`of ${totalAssets} family stages`}
             trend={analytics.series.slice(-7).map((point) => point.health)}
             trendLabels={analytics.series.slice(-7).map((point) => point.label)}
-            seriesName="Mill health"
+            seriesName="Quality score"
             seriesUnit="%"
           />
         </Reveal>
         <Reveal delay={160} className="h-full min-w-0">
           <KpiCard
-            label="Assets at risk"
+            label="Stages at risk"
             icon="crisis_alert"
             tone="warning"
             value={atRisk}
-            caption="watch or critical health"
+            caption="watch or critical quality"
             trend={analytics.series.slice(-7).map((point) => point.critical)}
             trendLabels={analytics.series.slice(-7).map((point) => point.label)}
             seriesName="Assets at risk"
@@ -150,7 +134,7 @@ export default function TextilesOverviewPage() {
         </Reveal>
         <Reveal delay={240} className="h-full min-w-0">
           <KpiCard
-            label="Avoided downtime"
+            label="Protected production"
             icon="savings"
             highlight
             value={data.kpis.avoidedDowntimePct}
@@ -158,7 +142,7 @@ export default function TextilesOverviewPage() {
             caption={`${data.kpis.avoidedDowntimeHrs} h of ${data.kpis.potentialDowntimeHrs} h potential`}
             trend={analytics.series.slice(-7).map((point) => point.health)}
             trendLabels={analytics.series.slice(-7).map((point) => point.label)}
-            seriesName="Health trend"
+            seriesName="Quality trend"
             seriesUnit="%"
           />
         </Reveal>
@@ -167,15 +151,15 @@ export default function TextilesOverviewPage() {
       {analytics.series.length ? (
         <section className="grid min-w-0 grid-cols-1 items-stretch gap-4 md:grid-cols-3">
           <ChartCard
-            title="Reliability pulse"
-            description="Thirty-day alert volume and average mill health"
+            title="Quality pulse"
+            description="Thirty-day alert volume and average stage quality"
             className="h-full"
           >
             <TrendChart data={analytics.series} height={250} />
           </ChartCard>
           <ChartCard
-            title="Risk by asset family"
-            description="Open predictive events by textile process"
+            title="Risk by fabric family"
+            description="Open quality events by fabric construction"
             className="h-full"
           >
             <HorizontalRiskChart data={analytics.familyRisk} height={250} />
@@ -190,50 +174,13 @@ export default function TextilesOverviewPage() {
         </section>
       ) : null}
 
-      <section className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
-        <Reveal className="h-full min-w-0">
-          <div className="flex h-full flex-col rounded-lg border border-outline-variant bg-surface-container-lowest">
-            <div className="flex items-center justify-between border-b border-outline-variant px-5 py-4">
-              <h2 className="font-headline flex items-center gap-2 text-lg font-semibold text-primary">
-                <span className="pulse-dot inline-block h-2 w-2 rounded-full bg-error text-error" />
-                Live Mill Alerts
-              </h2>
-              <Link href="/discover/textiles/alerts" className="font-label-caps text-secondary hover:underline">
-                Alert feed
-              </Link>
-            </div>
-            <ul className="flex flex-1 flex-col divide-y divide-outline-variant">
-              {data.recentAlerts.slice(0, 5).map((a, i) => (
-                <li key={a.id} className="anim-slide-in flex-1" style={{ animationDelay: `${i * 70}ms` }}>
-                  <Link
-                    href={`/operate/alerts/${a.id}`}
-                    className="flex h-full items-center justify-between gap-4 px-5 py-3 transition-colors hover:bg-surface-bright"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-on-surface">{a.title}</p>
-                      <p className="font-data-mono mt-0.5 text-xs text-on-surface-variant">
-                        {a.asset.assetCode} · {a.asset.plant.name}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-3">
-                      <StatusPill status={a.severity} />
-                      <span className="material-symbols-outlined text-[16px] text-outline">
-                        chevron_right
-                      </span>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Reveal>
-
-        <Reveal delay={100} className="h-full min-w-0">
+      <section>
+        <Reveal delay={100} className="min-w-0">
           <div className="flex h-full flex-col rounded-lg border border-outline-variant bg-surface-container-lowest">
             <div className="border-b border-outline-variant px-5 py-4">
-              <h2 className="font-headline text-lg font-semibold text-primary">Mill Facilities</h2>
+              <h2 className="font-headline text-lg font-semibold text-primary">Production Areas</h2>
             </div>
-            <div className="flex flex-1 flex-col justify-evenly gap-3 p-4">
+            <div className="grid flex-1 gap-3 p-4 md:grid-cols-3">
               {data.plants.map((p, i) => (
                 <Link
                   key={p.id}
@@ -266,7 +213,7 @@ export default function TextilesOverviewPage() {
       <section>
         <Reveal>
           <div className="mb-3 flex items-end justify-between border-b border-outline-variant pb-2">
-            <h2 className="font-headline text-lg font-semibold text-primary">Asset Families</h2>
+            <h2 className="font-headline text-lg font-semibold text-primary">Production Families</h2>
             <Link href="/discover/textiles/families" className="font-label-caps text-secondary hover:underline">
               All families
             </Link>
@@ -282,7 +229,7 @@ export default function TextilesOverviewPage() {
                 <h3 className="font-headline text-lg font-semibold text-primary">{f.name}</h3>
                 <p className="mt-2 flex-1 text-sm text-on-surface-variant">{f.description}</p>
                 <div className="font-data-mono mt-4 flex justify-between border-t border-outline-variant pt-3 text-xs">
-                  <span>{f._count.assets} assets</span>
+                  <span>{f._count.assets} stages</span>
                   <span className="text-secondary">{f.templates[0]?.name ?? "Templates"}</span>
                 </div>
               </Link>
@@ -295,39 +242,43 @@ export default function TextilesOverviewPage() {
         <Reveal>
           <div className="mb-3 flex items-end justify-between border-b border-outline-variant pb-2">
             <h2 className="font-headline text-lg font-semibold text-primary">
-              Reliability Solutions
+              AI Modules
             </h2>
             <Link href="/discover/textiles/solutions" className="font-label-caps text-secondary hover:underline">
-              Full library
+              Explore modules
             </Link>
           </div>
         </Reveal>
         <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {solutions.slice(0, 6).map((s, i) => (
-            <Reveal key={`${s.slug}-${s.title}`} delay={i * 70} className="h-full min-w-0">
+          {AI_MODULES.map((module, i) => {
+            const stageLabels = [...new Set(module.coverage
+              .map((item) => STAGES.find((stage) => stage.slug === item.stage)?.shortLabel)
+              .filter((label): label is string => Boolean(label)))];
+            return (
+            <Reveal key={module.slug} delay={i * 70} className="h-full min-w-0">
               <Link
-                href={s.href}
+                href={`/discover/textiles/solutions/${module.slug}`}
                 className="lift block h-full rounded-lg border border-outline-variant bg-surface-container-lowest p-4"
               >
                 <span className="material-symbols-outlined mb-2 text-2xl text-secondary">
-                  {s.icon}
+                  {module.icon}
                 </span>
-                <p className="font-label-caps text-on-surface-variant">{s.family}</p>
-                <h3 className="mt-1 text-sm font-bold text-primary">{s.title}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">{s.body}</p>
+                <p className="font-label-caps text-on-surface-variant">{module.code} · Woven + Knits</p>
+                <h3 className="mt-1 text-sm font-bold text-primary">{module.name}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">{module.summary}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  {s.tags.map((t) => (
+                  {stageLabels.map((label) => (
                     <span
-                      key={t}
+                      key={label}
                       className="font-data-mono rounded border border-outline-variant bg-surface-container px-1.5 py-0.5 text-[10px] text-outline"
                     >
-                      {t}
+                      {label}
                     </span>
                   ))}
                 </div>
               </Link>
             </Reveal>
-          ))}
+          );})}
         </div>
       </section>
     </div>

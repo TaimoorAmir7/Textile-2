@@ -36,7 +36,6 @@ export type AnalyticsData = {
     critical: number;
     health: number;
     downtime: number;
-    maintenanceCost: number;
   }[];
   severity: { name: string; value: number }[];
   alertStatus: { name: string; value: number }[];
@@ -343,11 +342,7 @@ function ChartLegend({ items, align = "end" }: { items: { color: string; label: 
 }
 
 function familyShortName(name: string) {
-  const value = name.replace(/\s*Family$/i, "").trim();
-  if (/spinning/i.test(value)) return "Spinning";
-  if (/loom/i.test(value)) return "Weaving";
-  if (/dye/i.test(value)) return "Dyeing";
-  return value;
+  return name.replace(/\s*Family$/i, "").trim();
 }
 
 export function TrendChart({
@@ -501,6 +496,7 @@ export function DonutChart({
               animationDuration={900}
               onMouseEnter={(_, index) => setActive(index)}
               onMouseLeave={() => setActive(null)}
+              onMouseDown={(_, __, event) => event.preventDefault()}
             >
               {data.map((entry, index) => (
                 <Cell
@@ -552,15 +548,15 @@ export function HealthGauge({ value, height = 150 }: { value: number; height?: n
       </ResponsiveContainer>
       <div className="absolute inset-x-0 top-[48%] text-center">
         <div className="font-headline text-2xl font-bold">{formatExact(shown)}%</div>
-        <div className="font-label-caps text-on-surface-variant">Health</div>
+        <div className="font-label-caps text-on-surface-variant">Quality</div>
       </div>
     </div>
   );
 }
 
 /**
- * MTBF is an order of magnitude larger than MTTR and downtime, so the short
- * durations share a right-hand axis to stay readable.
+ * First-pass quality is larger than defect and hold rates, so the shorter
+ * percentages share a right-hand axis to stay readable.
  */
 export function ReliabilityChart({
   data,
@@ -576,9 +572,9 @@ export function ReliabilityChart({
     <div className="min-w-0">
       <ChartLegend
         items={[
-          { color: theme.primary, label: "MTBF (h)" },
-          { color: theme.secondary, label: "MTTR (h)" },
-          { color: theme.error, label: "Downtime (h)" },
+          { color: theme.primary, label: "First-pass quality (%)" },
+          { color: theme.secondary, label: "Defect rate (%)" },
+          { color: theme.error, label: "Hold rate (%)" },
         ]}
       />
       <div className="h-64">
@@ -589,13 +585,13 @@ export function ReliabilityChart({
             <YAxis yAxisId="mtbf" tick={axisTick} tickLine={false} axisLine={false} />
             <YAxis yAxisId="short" orientation="right" tick={axisTick} tickLine={false} axisLine={false} />
             <Tooltip content={<InfoTooltip />} wrapperStyle={chartTooltipWrapper} cursor={{ fill: "rgba(17, 24, 39, 0.06)" }} />
-            <Bar yAxisId="mtbf" dataKey="mtbf" name="MTBF (h)" fill={theme.primary} radius={[8, 8, 8, 8]} maxBarSize={40} animationDuration={800} />
-            <Bar yAxisId="short" dataKey="mttr" name="MTTR (h)" fill={theme.secondary} radius={[8, 8, 8, 8]} maxBarSize={40} animationDuration={800} />
+            <Bar yAxisId="mtbf" dataKey="mtbf" name="First-pass quality (%)" fill={theme.primary} radius={[8, 8, 8, 8]} maxBarSize={40} animationDuration={800} />
+            <Bar yAxisId="short" dataKey="mttr" name="Defect rate (%)" fill={theme.secondary} radius={[8, 8, 8, 8]} maxBarSize={40} animationDuration={800} />
             <Line
               yAxisId="short"
               type="natural"
               dataKey="downtimeHrs"
-              name="Downtime (h)"
+              name="Hold rate (%)"
               stroke={theme.error}
               strokeWidth={2.6}
               dot={{ r: 4 }}
@@ -622,11 +618,11 @@ export function CostHealthScatter({
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ top: 10, right: 16, left: 4, bottom: 8 }}>
           <CartesianGrid stroke={theme.grid} strokeDasharray="4 8" />
-          <XAxis type="number" dataKey="health" name="Health" unit="%" domain={[60, 100]} tick={axisTick} />
-          <YAxis type="number" dataKey="cost" name="Downtime share" unit="%" tick={axisTick} />
+          <XAxis type="number" dataKey="health" name="Quality" unit="%" domain={[60, 100]} tick={axisTick} />
+          <YAxis type="number" dataKey="cost" name="Alert share" unit="%" tick={axisTick} />
           <ZAxis type="number" dataKey="alerts" range={[80, 360]} name="Alerts" />
           <Tooltip cursor={{ strokeDasharray: "4 6" }} content={<InfoTooltip />} wrapperStyle={chartTooltipWrapper} />
-          <Scatter name="Asset families" data={visible} fill={theme.secondary} />
+          <Scatter name="Fabric families" data={visible} fill={theme.secondary} />
         </ScatterChart>
       </ResponsiveContainer>
     </div>

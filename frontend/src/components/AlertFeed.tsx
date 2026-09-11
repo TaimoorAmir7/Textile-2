@@ -19,8 +19,8 @@ type Alert = {
   status: string;
   detectedAt: string;
   payload: {
-    vibration?: { t: number; v: number }[];
-    failureModes?: { name: string; confidence: number }[];
+    qualityScoreSeries?: { t: number; v: number }[];
+    causality?: { name: string; confidence: number }[];
   };
   asset: {
     assetCode: string;
@@ -39,9 +39,9 @@ const FILTERS = [
 ];
 
 export function AlertFeed({
-  title = "Mill Alert Feed",
+  title = "Production Quality Alerts",
   eyebrow,
-  description = "Predictive alerts raised by deployed textile templates across spinning, weaving, and dyeing. Acknowledge here or open the full investigation.",
+  description = "Fabric-quality events raised across Woven and Knit production stages. Acknowledge here or open the full stage investigation.",
 }: {
   title?: string;
   eyebrow?: string;
@@ -140,7 +140,7 @@ export function AlertFeed({
 
       {analytics ? (
         <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-3">
-          <ChartCard title="Alert volume" description="Predictive events raised over the last 30 days" className="lg:col-span-2">
+          <ChartCard title="Alert volume" description="Production-quality events raised over the last 30 days" className="lg:col-span-2">
             <TrendChart data={analytics.series} height={220} showHealth={false} />
           </ChartCard>
           <ChartCard title="Severity mix" description="Current active and acknowledged alerts">
@@ -190,12 +190,12 @@ export function AlertFeed({
                     </span>
                   </div>
                   <p className="font-data-mono mt-1 text-xs text-on-surface-variant">
-                    {a.asset.assetCode} · {a.asset.family.name} · {a.asset.plant.name} ·{" "}
+                      {a.asset.assetCode} · {a.asset.family.name} · {a.asset.plant.name} ·{" "}
                     {new Date(a.detectedAt).toLocaleString()}
                   </p>
-                  {a.payload.failureModes?.length ? (
+                  {a.payload.causality?.length ? (
                     <div className="mt-3 max-w-md space-y-2">
-                      {a.payload.failureModes.slice(0, 2).map((m, mi) => (
+                      {a.payload.causality.slice(0, 2).map((m, mi) => (
                         <div key={m.name}>
                           <div className="flex justify-between text-xs">
                             <span>{m.name}</span>
@@ -218,13 +218,13 @@ export function AlertFeed({
 
                 <div className="w-full max-w-48 lg:w-40">
                   <Sparkline
-                    points={(a.payload.vibration ?? []).map((p) => p.v)}
+                    points={(a.payload.qualityScoreSeries ?? []).map((p) => p.v)}
                     stroke={a.severity === "CRITICAL" ? theme.error : a.severity === "WATCH" ? theme.warning : theme.secondary}
                     fill
                     height={44}
                     delay={i * 70}
                   />
-                  <p className="font-label-caps mt-1 text-center text-on-surface-variant">Vibration 24h</p>
+                  <p className="font-label-caps mt-1 text-center text-on-surface-variant">Quality trend 24h</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -242,7 +242,7 @@ export function AlertFeed({
                     href={`/operate/alerts/${a.id}`}
                     className="rounded bg-primary px-3 py-1.5 font-label-caps text-on-primary"
                   >
-                    Investigate
+                    Investigate stage
                   </Link>
                 </div>
               </div>

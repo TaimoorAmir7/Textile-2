@@ -51,7 +51,7 @@ export function RecentlyViewed() {
         </ul>
       ) : (
         <p className="text-sm text-on-surface-variant">
-          Open a family, template, or alert and it will appear here for this session.
+          Open a family, stage, template, or alert and it will appear here for this session.
         </p>
       )}
       <button

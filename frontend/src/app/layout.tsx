@@ -3,8 +3,8 @@ import { AppShell } from "@/components/AppShell";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Spark Technologies — Reliability",
-  description: "Textile asset reliability platform",
+  title: "Spark Technologies — Production Reliability",
+  description: "Textile production-quality reliability platform",
 };
 
 export const viewport = {

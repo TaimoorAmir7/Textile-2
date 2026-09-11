@@ -5,11 +5,10 @@ import { usePathname } from "next/navigation";
 
 const TABS = [
   { href: "/discover/textiles", label: "Overview", icon: "dashboard" },
-  { href: "/discover/textiles/families", label: "Asset Families", icon: "precision_manufacturing" },
-  { href: "/discover/textiles/solutions", label: "Reliability Solutions", icon: "schema" },
-  { href: "/discover/textiles/templates", label: "Template Library", icon: "inventory_2" },
-  { href: "/discover/textiles/alerts", label: "Alerts", icon: "warning" },
-  { href: "/discover/textiles/architecture", label: "Reference Architecture", icon: "account_tree" },
+  { href: "/discover/textiles/families", label: "Production Families", icon: "precision_manufacturing" },
+  { href: "/discover/textiles/solutions", label: "AI Modules", icon: "neurology" },
+  { href: "/discover/textiles/templates", label: "Stage Templates", icon: "inventory_2" },
+  { href: "/discover/textiles/architecture", label: "Production Flow", icon: "account_tree" },
 ];
 
 export function TextileTabs() {

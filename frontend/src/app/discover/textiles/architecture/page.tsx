@@ -5,34 +5,40 @@ import { Reveal } from "@/components/Reveal";
 
 const LAYERS = [
   {
-    title: "Mill Machinery",
-    icon: "precision_manufacturing",
-    items: ["Ring spinning frames", "Air-jet looms", "Jet dyeing machines"],
-    note: "Vibration, temperature, current, tension, and pressure sensors on rotating and thermal equipment.",
+    title: "Greige",
+    icon: "texture",
+    items: ["Incoming fabric", "Construction", "GSM / width"],
+    note: "Raw Woven or Knit fabric is identified and inspected before wet processing.",
   },
   {
-    title: "Edge Infrastructure",
-    icon: "router",
-    items: ["Edge gateways", "Local buffering", "Protocol adapters"],
-    note: "Shop-floor collection at 1–100 Hz with store-and-forward when the link to the plant network drops.",
+    title: "Pre-treatment",
+    icon: "water_drop",
+    items: ["Desizing", "Scouring", "Bleaching"],
+    note: "Absorbency, whiteness and final pH are controlled so later dye uptake remains uniform.",
   },
   {
-    title: "Unified Data Model",
-    icon: "database",
-    items: ["Plants & assets", "Asset families", "Signal mappings"],
-    note: "Template signals map to mill tags so one template serves every frame, loom, and vat of that type.",
+    title: "Dyeing",
+    icon: "palette",
+    items: ["Target shade", "Uniformity", "Fixation"],
+    note: "The batch is coloured and checked for shade variation, barré, crease marks and fixation.",
   },
   {
-    title: "Analytics & Templates",
-    icon: "model_training",
-    items: ["Envelope analysis", "Thermal envelopes", "Failure-mode library"],
-    note: "Deployed templates score each asset and raise watch or critical alerts with confidence per failure mode.",
+    title: "Printing",
+    icon: "format_paint",
+    items: ["Registration", "Repeat", "Colour yield"],
+    note: "Pattern alignment, print sharpness and colour bleed are checked against the approved design.",
   },
   {
-    title: "Reliability Workspace",
-    icon: "dashboard",
-    items: ["Operate dashboard", "Alert investigation", "Cases & work orders"],
-    note: "Engineers acknowledge alerts, open cases, and hand off work orders to maintenance.",
+    title: "Finishing",
+    icon: "auto_fix_high",
+    items: ["Shrinkage", "Width / GSM", "Bow / spirality"],
+    note: "Fabric is stabilised to its final width, handle and dimensional specification.",
+  },
+  {
+    title: "Folding / Rolling",
+    icon: "inventory_2",
+    items: ["Final inspection", "Quantity", "Lot label"],
+    note: "Finished fabric is measured in its family unit, verified, labelled and released.",
   },
 ];
 
@@ -41,11 +47,10 @@ export default function ArchitecturePage() {
     <div className="space-y-6 p-5">
       <Reveal>
         <div>
-          <h1 className="font-headline text-3xl font-bold text-primary">Reference Architecture</h1>
+          <h1 className="font-headline text-3xl font-bold text-primary">Production Flow</h1>
           <p className="mt-1 max-w-3xl text-on-surface-variant">
-            How mill telemetry becomes a reliability decision: sensors on textile machinery flow
-            through edge collection into a unified asset model, get scored by deployed templates,
-            and surface as alerts, cases, and work orders.
+            The shared six-stage fabrication route for Woven and Knit / Hosiery. Every stage feeds
+            the existing dashboards and alerts while retaining family-specific quality checks.
           </p>
         </div>
       </Reveal>
@@ -60,7 +65,7 @@ export default function ArchitecturePage() {
                     <span className="material-symbols-outlined text-[20px]">{layer.icon}</span>
                   </span>
                   <div>
-                    <p className="font-label-caps text-on-surface-variant">Layer {i + 1}</p>
+                    <p className="font-label-caps text-on-surface-variant">Stage {i + 1}</p>
                     <h2 className="font-headline text-lg font-semibold text-primary">
                       {layer.title}
                     </h2>
@@ -97,11 +102,11 @@ export default function ArchitecturePage() {
         <div className="flex flex-wrap gap-3 rounded-lg border border-outline-variant bg-surface-container-low p-5">
           <div className="flex-1">
             <h2 className="font-headline text-lg font-semibold text-primary">
-              Ready to connect a mill asset?
+              Ready to inspect a production family?
             </h2>
             <p className="mt-1 text-sm text-on-surface-variant">
-              Pick a template, map its signals to your tags, and the asset starts reporting into
-              Operate immediately.
+              Open Woven or Knit, select one of its six stages, and review the stage image,
+              checklist and fabric risks. Production alerts remain in Operate.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -109,7 +114,7 @@ export default function ArchitecturePage() {
               href="/discover/textiles/templates"
               className="sheen rounded bg-secondary px-4 py-2 font-label-caps text-on-secondary"
             >
-              Template library
+              Stage templates
             </Link>
             <Link
               href="/operate"

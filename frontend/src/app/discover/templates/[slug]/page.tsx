@@ -54,7 +54,7 @@ export default function TemplatePage() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded border border-outline-variant bg-surface-container-lowest p-4">
-          <h3 className="mb-3 font-headline text-lg font-semibold text-primary">Signals &amp; data</h3>
+          <h3 className="mb-3 font-headline text-lg font-semibold text-primary">Quality checks &amp; data</h3>
           <div className="max-w-full overflow-x-auto">
           <table className="min-w-[460px] w-full text-left text-sm">
             <thead>
@@ -77,7 +77,7 @@ export default function TemplatePage() {
           </div>
         </div>
         <div className="rounded border border-outline-variant bg-surface-container-lowest p-4">
-          <h3 className="mb-3 font-headline text-lg font-semibold text-primary">Failure modes</h3>
+          <h3 className="mb-3 font-headline text-lg font-semibold text-primary">Production defect risks</h3>
           <ul className="space-y-3">
             {tpl.failureModes.map((m) => (
               <li key={m.name} className="rounded border border-outline-variant p-3">

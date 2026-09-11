@@ -32,12 +32,12 @@ export default function WorkOrdersPage() {
   return (
     <div className="w-full space-y-5 p-4 sm:p-5">
       <PageHeader
-        title="Work Orders"
+        title="Quality Actions"
         eyebrow="Operate"
-        description="Maintenance jobs released from reliability cases. A work order is the handoff from the case to the mill floor."
+        description="Containment and corrective actions released from quality cases to the production floor."
       />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-        <MetricCard label="Released work orders" value={orders.length} icon="handyman" />
+        <MetricCard label="Released actions" value={orders.length} icon="handyman" />
         <MetricCard label="In field" value={inField.length} icon="engineering" />
         <MetricCard label="Open" value={open.length} icon="pending_actions" tone="highlight" />
       </div>
@@ -46,9 +46,9 @@ export default function WorkOrdersPage() {
           <table className="min-w-[820px] w-full text-left text-sm">
             <thead className="font-label-caps bg-surface-container-high text-on-surface-variant">
               <tr>
-                <th className="px-4 py-3">Work order</th>
+                <th className="px-4 py-3">Action reference</th>
                 <th>Case</th>
-                <th>Asset</th>
+                <th>Stage</th>
                 <th>Priority</th>
                 <th>Trade status</th>
                 <th>Assigned to</th>
@@ -77,7 +77,7 @@ export default function WorkOrdersPage() {
         </div>
         {orders.length === 0 ? (
           <p className="px-4 py-8 text-sm text-on-surface-variant">
-            No work orders yet. Open a case and add a work-order reference to release it to the floor.
+            No quality actions yet. Open a case and add an action reference to release it to the floor.
           </p>
         ) : null}
       </div>

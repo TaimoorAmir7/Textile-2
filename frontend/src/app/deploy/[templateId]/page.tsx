@@ -24,9 +24,9 @@ type Template = {
 };
 
 const STEPS = [
-  { label: "Select assets", detail: "Choose mill assets" },
-  { label: "Map signals", detail: "Bind mill tags" },
-  { label: "Thresholds", detail: "Set alert limits" },
+  { label: "Select stages", detail: "Choose family stages" },
+  { label: "Map checks", detail: "Bind quality fields" },
+  { label: "Thresholds", detail: "Set quality limits" },
   { label: "Preview & deploy", detail: "Confirm and go live" },
 ];
 
@@ -38,7 +38,7 @@ export default function DeployWizardPage() {
   const [templates] = useMill<Template[]>("/api/templates");
   const [selected, setSelected] = useState<string[]>([]);
   const [tags, setTags] = useState<Record<string, string>>({});
-  const [thresholds, setThresholds] = useState({ vibration: 4.5, temperature: 80, quality: 96 });
+  const [thresholds, setThresholds] = useState({ qualityScore: 75, processCompliance: 80, dataQuality: 96 });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -154,7 +154,7 @@ export default function DeployWizardPage() {
               <>
                 <div className="mb-2 flex shrink-0 items-center justify-between">
                   <p className="text-xs text-on-surface-variant">
-                    {selected.length} of {assets.length} assets selected
+                    {selected.length} of {assets.length} stages selected
                   </p>
                   <button
                     type="button"
@@ -215,29 +215,29 @@ export default function DeployWizardPage() {
             {step === 2 && (
               <div className="space-y-3">
                 <label className="block rounded-lg border border-outline-variant px-3 py-2">
-                  <span className="text-sm font-semibold">Vibration alert (mm/s)</span>
+                  <span className="text-sm font-semibold">Quality score alert threshold</span>
                   <input
                     type="range"
-                    min={1}
-                    max={10}
-                    step={0.1}
-                    value={thresholds.vibration}
-                    onChange={(e) => setThresholds((t) => ({ ...t, vibration: Number(e.target.value) }))}
+                    min={50}
+                    max={100}
+                    step={1}
+                    value={thresholds.qualityScore}
+                    onChange={(e) => setThresholds((t) => ({ ...t, qualityScore: Number(e.target.value) }))}
                     className="mt-2 w-full"
                   />
-                  <span className="font-data-mono text-sm">{thresholds.vibration}</span>
+                  <span className="font-data-mono text-sm">{thresholds.qualityScore}%</span>
                 </label>
                 <label className="block rounded-lg border border-outline-variant px-3 py-2">
-                  <span className="text-sm font-semibold">Temperature alert (°C)</span>
+                  <span className="text-sm font-semibold">Process compliance threshold (%)</span>
                   <input
                     type="number"
-                    value={thresholds.temperature}
-                    onChange={(e) => setThresholds((t) => ({ ...t, temperature: Number(e.target.value) }))}
+                    value={thresholds.processCompliance}
+                    onChange={(e) => setThresholds((t) => ({ ...t, processCompliance: Number(e.target.value) }))}
                     className="mt-1.5 w-full rounded border border-outline-variant px-3 py-1.5"
                   />
                 </label>
                 <p className="text-xs text-on-surface-variant">
-                  Data quality: <span className="font-data-mono font-bold text-secondary">{thresholds.quality}%</span>
+                  Data quality: <span className="font-data-mono font-bold text-secondary">{thresholds.dataQuality}%</span>
                 </p>
               </div>
             )}
@@ -245,17 +245,17 @@ export default function DeployWizardPage() {
             {step === 3 && (
               <div className="grid gap-2 sm:grid-cols-2">
                 <div className="rounded-lg border border-outline-variant p-3">
-                  <p className="font-label-caps text-on-surface-variant">Assets</p>
+                  <p className="font-label-caps text-on-surface-variant">Stages</p>
                   <p className="font-headline mt-1 text-2xl font-bold text-primary">{selected.length}</p>
                 </div>
                 <div className="rounded-lg border border-outline-variant p-3">
-                  <p className="font-label-caps text-on-surface-variant">Signals</p>
+                  <p className="font-label-caps text-on-surface-variant">Quality checks</p>
                   <p className="font-headline mt-1 text-2xl font-bold text-primary">{tpl.signals.length}</p>
                 </div>
                 <div className="rounded-lg border border-outline-variant p-3 sm:col-span-2">
                   <p className="font-label-caps text-on-surface-variant">Thresholds</p>
                   <p className="mt-1 text-sm">
-                    Vibration {thresholds.vibration} mm/s · Temperature {thresholds.temperature} °C · Quality {thresholds.quality}%
+                    Quality score {thresholds.qualityScore}% · Process compliance {thresholds.processCompliance}% · Data quality {thresholds.dataQuality}%
                   </p>
                 </div>
               </div>
@@ -277,7 +277,7 @@ export default function DeployWizardPage() {
                 points={[monitored, Math.max(monitored, 1), selected.length || monitored, selected.length || 1]}
                 labels={["Live", "Ready", "Picked", "Now"]}
                 color={theme.primary}
-                name="Assets"
+                name="Stages"
                 height={72}
               />
             </div>

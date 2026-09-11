@@ -24,16 +24,16 @@ export default function FamiliesIndexPage() {
     <div className="space-y-5 p-5">
       <Reveal>
         <div>
-          <h1 className="font-headline text-3xl font-bold text-primary">Textile Asset Families</h1>
+          <h1 className="font-headline text-3xl font-bold text-primary">Textile Production Families</h1>
           <p className="mt-1 max-w-3xl text-on-surface-variant">
-            Spinning, weaving, and dyeing equipment groups. Each family carries its own
-            specifications, known failure challenges, and reliability templates.
+            Woven and Knit / Hosiery production. Each family follows the same six stages while
+            retaining its own unit, fabric behavior, quality risks, and stage checklists.
           </p>
         </div>
       </Reveal>
 
       {analytics ? (
-        <ChartCard title="Family risk comparison" description="Predictive alerts requiring attention by production process">
+        <ChartCard title="Family risk comparison" description="Production-quality alerts requiring attention by fabric family">
           <HorizontalRiskChart data={analytics.familyRisk} height={190} />
         </ChartCard>
       ) : null}
@@ -90,7 +90,7 @@ export default function FamiliesIndexPage() {
                   <p className="font-label-caps mb-2 text-on-surface-variant">Coverage</p>
                   <p className="font-headline text-2xl font-bold text-primary">
                     {f._count.assets}
-                    <span className="ml-1 text-sm font-normal text-on-surface-variant">assets</span>
+                    <span className="ml-1 text-sm font-normal text-on-surface-variant">stages</span>
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {f.templates.map((t) => (

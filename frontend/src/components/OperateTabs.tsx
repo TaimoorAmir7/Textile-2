@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 const TABS = [
   { href: "/operate", label: "Dashboard", icon: "space_dashboard", exact: true },
   { href: "/operate/alerts", label: "Alerts", icon: "warning" },
-  { href: "/operate/cases", label: "Cases", icon: "assignment" },
-  { href: "/operate/work-orders", label: "Work Orders", icon: "engineering" },
-  { href: "/operate/assets", label: "Assets", icon: "precision_manufacturing" },
+  { href: "/operate/cases", label: "Quality Cases", icon: "assignment" },
+  { href: "/operate/work-orders", label: "Quality Actions", icon: "engineering" },
+  { href: "/operate/assets", label: "Stages", icon: "precision_manufacturing" },
 ];
 
 export function OperateTabs() {

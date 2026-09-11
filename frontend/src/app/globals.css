@@ -10,9 +10,9 @@
 }
 
 @theme inline {
-  --font-headline: var(--font-hanken);
-  --font-body: var(--font-inter);
-  --font-mono-data: var(--font-jetbrains);
+  --font-headline: "Outfit", sans-serif;
+  --font-body: "Plus Jakarta Sans", "Segoe UI", Tahoma, sans-serif;
+  --font-mono-data: "JetBrains Mono", ui-monospace, monospace;
   --spacing-sidebar-width: 260px;
   --spacing-sidebar-rail-width: 72px;
   --spacing-container-margin: 40px;
@@ -188,6 +188,7 @@ html,
 body {
   height: 100%;
   max-width: 100%;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
   background:
     radial-gradient(1200px 520px at 8% -10%, color-mix(in srgb, var(--spark-secondary) 18%, transparent), transparent 60%),
     radial-gradient(900px 480px at 100% 0%, color-mix(in srgb, var(--spark-tertiary) 16%, transparent), transparent 55%),
@@ -215,7 +216,7 @@ textarea {
   display: inline-block;
   width: 1em;
   overflow: hidden;
-  font-family: "Material Symbols Outlined", sans-serif;
+  font-family: "Material Symbols Outlined" !important;
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
   font-size: 20px;
   line-height: 1;

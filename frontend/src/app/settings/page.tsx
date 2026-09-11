@@ -15,15 +15,15 @@ const PROFILE = {
 };
 
 const RESPONSIBILITIES = [
-  { label: "Spinning Hall", detail: "Ring frames SF-204 and SF-301", href: "/operate/assets?plant=FSD-SP" },
-  { label: "Weaving Shed", detail: "Air-jet looms Line A and Line B", href: "/operate/assets?plant=FSD-WV" },
-  { label: "Dye House", detail: "Jet dyeing machines Bay 2", href: "/operate/assets?plant=FSD-DY" },
+  { label: "Woven Production", detail: "Six-stage route · measured in meters", href: "/discover/textiles/families/woven" },
+  { label: "Knit / Hosiery Production", detail: "Six-stage route · measured in kilograms", href: "/discover/textiles/families/knit" },
+  { label: "Quality Release", detail: "Cross-stage defects, causality, and disposition", href: "/operate/alerts" },
 ];
 
 const PREFERENCES = [
   { label: "Alert notifications", value: "Critical and watch" },
   { label: "Default landing page", value: "Operate command center" },
-  { label: "Assigned cases", value: "Auto-assign spinning alerts" },
+  { label: "Assigned cases", value: "Auto-assign major quality alerts" },
   { label: "Language", value: "English" },
 ];
 
@@ -71,7 +71,7 @@ export default function SettingsPage() {
         <article className="rounded-lg border border-outline-variant bg-surface-container-lowest p-5">
           <h3 className="font-headline text-lg font-semibold text-primary">Assigned areas</h3>
           <p className="mt-1 text-sm text-on-surface-variant">
-            Reliability ownership across the mill. Opening an area takes you to its asset list.
+            Production-quality ownership across the mill. Opening an area takes you to its live route.
           </p>
           <ul className="mt-4 space-y-3">
             {RESPONSIBILITIES.map((item) => (

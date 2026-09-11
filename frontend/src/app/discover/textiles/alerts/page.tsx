@@ -1,13 +1,5 @@
-"use client";
-
-import { AlertFeed } from "@/components/AlertFeed";
+import { redirect } from "next/navigation";
 
 export default function TextileAlertsPage() {
-  return (
-    <AlertFeed
-      title="Alerts"
-      eyebrow="Textiles & Apparel"
-      description="Predictive events across spinning, weaving, and dyeing. Acknowledge here, then investigate into a case and work order."
-    />
-  );
+  redirect("/operate/alerts");
 }

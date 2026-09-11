@@ -1,3 +1,5 @@
+import { familyLabel, moduleBySlug, type ModuleFamilySlug } from "./ai-modules";
+
 export type HeaderCrumb = {
   label: string;
   href?: string;
@@ -25,6 +27,22 @@ function titleFromSlug(slug: string) {
     .join(" ");
 }
 
+function familyTitle(slug: string) {
+  return slug === "knit" ? "Knit / Hosiery" : slug === "woven" ? "Woven" : titleFromSlug(slug);
+}
+
+function stageTitle(slug: string) {
+  const labels: Record<string, string> = {
+    greige: "Greige inspection",
+    "pre-treatment": "Pre-treatment",
+    dyeing: "Dyeing",
+    printing: "Printing",
+    finishing: "Finishing",
+    "folding-rolling": "Folding / Rolling",
+  };
+  return labels[slug] ?? titleFromSlug(slug);
+}
+
 export function headerCrumbs(pathname: string): HeaderCrumb[] {
   if (crumbOverride?.length) return crumbOverride;
 
@@ -35,16 +53,24 @@ export function headerCrumbs(pathname: string): HeaderCrumb[] {
   if (pathname.startsWith("/discover")) {
     const textiles: HeaderCrumb[] = [
       { label: "Discover", href: "/discover" },
-      { label: "Textiles & Apparel", href: "/discover/textiles" },
+      { label: "Textiles", href: "/discover/textiles" },
     ];
     if (pathname === "/discover/textiles") return textiles;
+
+    const stage = pathname.match(/^\/discover\/textiles\/families\/([^/]+)\/([^/]+)$/);
+    if (stage) {
+      return [
+        ...textiles,
+        { label: familyTitle(stage[1]), href: `/discover/textiles/families/${stage[1]}` },
+        { label: stageTitle(stage[2]) },
+      ];
+    }
 
     const family = pathname.match(/^\/discover\/textiles\/families\/([^/]+)$/);
     if (family) {
       return [
         ...textiles,
-        { label: "Asset Families", href: "/discover/textiles/families" },
-        { label: `${titleFromSlug(family[1])} Family` },
+        { label: familyTitle(family[1]) },
       ];
     }
 
@@ -57,12 +83,35 @@ export function headerCrumbs(pathname: string): HeaderCrumb[] {
       ];
     }
 
+    const moduleFamily = pathname.match(/^\/discover\/textiles\/solutions\/([^/]+)\/([^/]+)$/);
+    if (moduleFamily) {
+      const aiModule = moduleBySlug(moduleFamily[1]);
+      const family = moduleFamily[2] === "woven" || moduleFamily[2] === "knit"
+        ? familyLabel(moduleFamily[2] as ModuleFamilySlug)
+        : titleFromSlug(moduleFamily[2]);
+      return [
+        ...textiles,
+        { label: "AI Modules", href: "/discover/textiles/solutions" },
+        { label: aiModule?.shortName ?? titleFromSlug(moduleFamily[1]), href: `/discover/textiles/solutions/${moduleFamily[1]}` },
+        { label: family },
+      ];
+    }
+
+    const modulePage = pathname.match(/^\/discover\/textiles\/solutions\/([^/]+)$/);
+    if (modulePage) {
+      const aiModule = moduleBySlug(modulePage[1]);
+      return [
+        ...textiles,
+        { label: "AI Modules", href: "/discover/textiles/solutions" },
+        { label: aiModule?.shortName ?? titleFromSlug(modulePage[1]) },
+      ];
+    }
+
     const textileTab: Record<string, string> = {
-      "/discover/textiles/families": "Asset Families",
-      "/discover/textiles/solutions": "Reliability Solutions",
-      "/discover/textiles/templates": "Template Library",
-      "/discover/textiles/alerts": "Alerts",
-      "/discover/textiles/architecture": "Reference Architecture",
+      "/discover/textiles/families": "Production Families",
+      "/discover/textiles/solutions": "AI Modules",
+      "/discover/textiles/templates": "Stage Templates",
+      "/discover/textiles/architecture": "Production Flow",
     };
     const tab = textileTab[pathname];
     if (tab) return [...textiles, { label: tab }];
@@ -83,14 +132,14 @@ export function headerCrumbs(pathname: string): HeaderCrumb[] {
 
     const alert = pathname.match(/^\/operate\/alerts\/([^/]+)$/);
     if (alert) {
-      return [...root, { label: "Alerts", href: "/operate/alerts" }, { label: "Investigation" }];
+      return [...root, { label: "Alerts", href: "/operate/alerts" }, { label: "Stage Investigation" }];
     }
 
     const operateTab: Record<string, string> = {
       "/operate/alerts": "Alerts",
-      "/operate/cases": "Cases",
-      "/operate/work-orders": "Work Orders",
-      "/operate/assets": "Assets",
+      "/operate/cases": "Quality Cases",
+      "/operate/work-orders": "Quality Actions",
+      "/operate/assets": "Stages",
     };
     const tab = operateTab[pathname];
     if (tab) return [...root, { label: tab }];

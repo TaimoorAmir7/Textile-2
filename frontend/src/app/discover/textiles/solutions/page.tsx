@@ -1,125 +1,107 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { Reveal } from "@/components/Reveal";
-import { templateHref } from "@/components/PageTrail";
-import { useMill } from "@/lib/use-mill";
+import { AI_MODULES, USTAAD_MODULE } from "@/lib/ai-modules";
+import { STAGES } from "@/lib/production-data";
+import { openUstaad } from "@/lib/ustaad";
 
-type Family = {
-  slug: string;
-  name: string;
-  useCases: { title: string; body: string; tags: string[]; icon: string }[];
-  templates: { slug: string; name: string }[];
-};
+function stageLabel(slug: string) {
+  return STAGES.find((stage) => stage.slug === slug)?.shortLabel ?? slug;
+}
 
-export default function SolutionsPage() {
-  const [families] = useMill<Family[]>("/api/families");
-  const [filter, setFilter] = useState("all");
-
-  const visible = families.filter((f) => filter === "all" || f.slug === filter);
-
+export default function AIModulesPage() {
   return (
-    <div className="space-y-5 p-5">
+    <div className="space-y-6 p-5">
       <Reveal>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-headline text-3xl font-bold text-primary">Reliability Solutions</h1>
+            <p className="font-label-caps text-secondary">Textile intelligence layer</p>
+            <h1 className="font-headline mt-1 text-3xl font-bold text-primary">AI Modules</h1>
             <p className="mt-1 max-w-3xl text-on-surface-variant">
-              Diagnostic use cases packaged with each textile template: what is detected, from which
-              signals, and which failure mode it maps to.
+              Select an AI capability, choose Woven or Knits / Hosiery, and continue to the
+              production stage or checkpoint where that capability applies.
             </p>
           </div>
-          <div className="flex gap-2">
-            <FilterChip active={filter === "all"} onClick={() => setFilter("all")}>
-              All families
-            </FilterChip>
-            {families.map((f) => (
-              <FilterChip key={f.slug} active={filter === f.slug} onClick={() => setFilter(f.slug)}>
-                {f.name.replace(" Family", "")}
-              </FilterChip>
-            ))}
+          <div className="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-3 text-right">
+            <p className="font-data-mono text-2xl font-bold text-primary">07</p>
+            <p className="font-label-caps text-on-surface-variant">Active modules</p>
           </div>
         </div>
       </Reveal>
 
-      {visible.map((f, fi) => (
-        <section key={f.slug} className="space-y-3">
-          <Reveal delay={fi * 60}>
-            <h2 className="font-headline border-b border-outline-variant pb-2 text-lg font-semibold text-primary">
-              {f.name}
-            </h2>
-          </Reveal>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {f.useCases.map((u, i) => (
-              <Reveal key={u.title} delay={i * 80}>
-                <div className="lift group relative h-full overflow-hidden rounded-lg border border-outline-variant bg-surface-container-lowest p-4">
-                  <div className="absolute -top-6 -right-6 h-16 w-16 rounded-xl bg-surface-container-low transition-colors group-hover:bg-secondary-fixed" />
-                  <span className="material-symbols-outlined relative mb-2 text-2xl text-secondary">
-                    {u.icon}
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {AI_MODULES.map((module, index) => {
+          const stages = [...new Set(module.coverage.map((item) => item.stage))];
+          return (
+            <Reveal key={module.slug} delay={index * 70} className="h-full">
+              <Link
+                href={`/discover/textiles/solutions/${module.slug}`}
+                className="lift group flex h-full flex-col rounded-lg border border-outline-variant bg-surface-container-lowest p-5 hover:border-secondary"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-secondary-container text-on-secondary-container">
+                    <span className="material-symbols-outlined text-[24px]">{module.icon}</span>
                   </span>
-                  <h3 className="relative font-headline text-base font-semibold text-primary">
-                    {u.title}
-                  </h3>
-                  <p className="relative mt-1 text-xs leading-relaxed text-on-surface-variant">
-                    {u.body}
-                  </p>
-                  <div className="relative mt-3 flex flex-wrap gap-1.5">
-                    {u.tags.map((t) => (
-                      <span
-                        key={t}
-                        className="font-data-mono rounded border border-outline-variant bg-surface-container px-1.5 py-0.5 text-[10px] text-outline"
-                      >
-                        {t}
+                  <span className="font-data-mono rounded bg-surface-container px-2 py-1 text-[10px] text-on-surface-variant">
+                    {module.code}
+                  </span>
+                </div>
+                <h2 className="font-headline mt-4 text-lg font-semibold text-primary">{module.name}</h2>
+                <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{module.summary}</p>
+                <p className="mt-3 flex-1 text-sm font-medium text-on-surface">{module.outcome}</p>
+                <div className="mt-4 border-t border-outline-variant pt-3">
+                  <p className="font-label-caps mb-2 text-on-surface-variant">Production coverage</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {stages.map((stage) => (
+                      <span key={stage} className="rounded border border-outline-variant bg-surface-container-low px-2 py-1 text-[11px] text-on-surface-variant">
+                        {stageLabel(stage)}
                       </span>
                     ))}
                   </div>
-                  <div className="relative mt-4 flex gap-3 border-t border-outline-variant pt-3">
-                    <Link
-                      href={`/discover/textiles/families/${f.slug}`}
-                      className="font-label-caps text-secondary hover:underline"
-                    >
-                      Family
-                    </Link>
-                    {(templateHref(f.templates, u.title) ?? (f.templates[0] ? `/discover/templates/${f.templates[0].slug}` : null)) ? (
-                      <Link
-                        href={templateHref(f.templates, u.title) ?? `/discover/templates/${f.templates[0].slug}`}
-                        className="font-label-caps text-secondary hover:underline"
-                      >
-                        Template
-                      </Link>
-                    ) : null}
-                  </div>
                 </div>
-              </Reveal>
-            ))}
-          </div>
-        </section>
-      ))}
+                <span className="font-label-caps mt-4 flex items-center justify-end gap-1 text-secondary">
+                  Select family
+                  <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+                </span>
+              </Link>
+            </Reveal>
+          );
+        })}
+        <Reveal delay={AI_MODULES.length * 70} className="h-full">
+          <button
+            type="button"
+            onClick={openUstaad}
+            className="lift group flex h-full w-full flex-col rounded-lg border border-outline-variant bg-surface-container-lowest p-5 text-left hover:border-secondary"
+          >
+            <div className="flex w-full items-start justify-between gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-secondary-container text-on-secondary-container">
+                <span className="material-symbols-outlined text-[24px]">{USTAAD_MODULE.icon}</span>
+              </span>
+              <span className="font-data-mono rounded bg-surface-container px-2 py-1 text-[10px] text-on-surface-variant">
+                {USTAAD_MODULE.code}
+              </span>
+            </div>
+            <h2 className="font-headline mt-4 text-lg font-semibold text-primary">{USTAAD_MODULE.name}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{USTAAD_MODULE.summary}</p>
+            <p className="mt-3 flex-1 text-sm font-medium text-on-surface">{USTAAD_MODULE.outcome}</p>
+            <div className="mt-4 w-full border-t border-outline-variant pt-3">
+              <p className="font-label-caps mb-2 text-on-surface-variant">Knowledge coverage</p>
+              <div className="flex flex-wrap gap-1.5">
+                {USTAAD_MODULE.coverage.map((item) => (
+                  <span key={item} className="rounded border border-outline-variant bg-surface-container-low px-2 py-1 text-[11px] text-on-surface-variant">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <span className="font-label-caps mt-4 flex w-full items-center justify-end gap-1 text-secondary">
+              Open Ustaad
+              <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-1">forum</span>
+            </span>
+          </button>
+        </Reveal>
+      </section>
     </div>
-  );
-}
-
-function FilterChip({
-  children,
-  active,
-  onClick,
-}: {
-  children: React.ReactNode;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded border px-3 py-1.5 font-label-caps transition-colors ${
-        active
-          ? "border-primary bg-primary text-on-primary"
-          : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:border-secondary"
-      }`}
-    >
-      {children}
-    </button>
   );
 }

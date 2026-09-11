@@ -46,7 +46,7 @@ export default function OperatePage() {
       <PageHeader
         title="Operations Dashboard"
         eyebrow="Operate"
-        description="Mill posture first, then alerts, cases, and work orders in that order."
+        description="Production-quality posture first, then alerts, quality cases, and actions in the established workflow."
       />
       <section className="grid grid-cols-2 items-stretch gap-4 xl:grid-cols-4">
         <KpiChartCard label="Active alerts" caption={`${data.kpis.criticalAlerts} critical`} icon="warning" tone="critical">
@@ -58,12 +58,12 @@ export default function OperatePage() {
             height={88}
           />
         </KpiChartCard>
-        <KpiChartCard label="Average health" caption="Across monitored assets" icon="monitor_heart">
+        <KpiChartCard label="Average quality" caption="Across controlled family stages" icon="monitor_heart">
           <HealthGauge value={data.kpis.avgHealth} height={120} />
         </KpiChartCard>
         <KpiChartCard
-          label="Avoided downtime"
-          caption={`${data.kpis.avoidedDowntimeHrs} h saved of ${data.kpis.potentialDowntimeHrs} h potential`}
+          label="Protected production"
+          caption={`${data.kpis.avoidedDowntimeHrs} equivalent hours protected`}
           icon="savings"
           tone="highlight"
         >
@@ -71,7 +71,7 @@ export default function OperatePage() {
             points={recent.length ? recent.map((point) => point.health) : [data.kpis.avoidedDowntimePct]}
             labels={labels}
             color={theme.onPrimary}
-            name="Avoided downtime"
+            name="Protected production"
             unit="%"
             height={88}
           />
@@ -91,17 +91,17 @@ export default function OperatePage() {
       {analytics ? (
         <>
           <section className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-3">
-            <ChartCard title="Reliability trend" description="Asset health against predictive alert volume" className="xl:col-span-2">
+            <ChartCard title="Quality trend" description="Stage quality against production-alert volume" className="xl:col-span-2">
               <TrendChart data={analytics.series} height={270} />
             </ChartCard>
-            <ChartCard title="Risk by asset family" description="Open predictive events">
+            <ChartCard title="Risk by fabric family" description="Open production-quality events">
               <HorizontalRiskChart data={analytics.familyRisk} height={270} />
             </ChartCard>
           </section>
           <ChartCard
-            title="Facility health"
-            description="Current health score and active alert load by production area"
-            action={<Link href="/operate/assets" className="text-sm text-secondary hover:underline">View assets</Link>}
+            title="Production-area quality"
+            description="Current quality score and active alert load by production area"
+            action={<Link href="/operate/assets" className="text-sm text-secondary hover:underline">View stages</Link>}
           >
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {analytics.facilities.map((facility) => (
@@ -109,7 +109,7 @@ export default function OperatePage() {
                   <HealthGauge value={facility.health} height={130} />
                   <div className="text-center">
                     <p className="text-sm font-semibold">{facility.name}</p>
-                    <p className="mt-1 text-xs text-on-surface-variant">{facility.assets} assets · {facility.alerts} alerts</p>
+                    <p className="mt-1 text-xs text-on-surface-variant">{facility.assets} stages · {facility.alerts} alerts</p>
                   </div>
                 </Link>
               ))}
@@ -127,7 +127,7 @@ export default function OperatePage() {
           <thead className="font-label-caps bg-surface-container-low text-on-surface-variant">
             <tr>
               <th className="px-6 py-3">Alert</th>
-              <th>Asset</th>
+              <th>Stage</th>
               <th>Facility</th>
               <th>Severity</th>
               <th>Status</th>

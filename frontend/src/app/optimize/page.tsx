@@ -25,7 +25,7 @@ export default function OptimizePage() {
   const avoidedPct = optimize.avoidedPct;
 
   function exportCsv() {
-    const header = "Family,Assets,Alerts,Cases,Health,MTBF_h,MTTR_h,Downtime_h\n";
+    const header = "Family,Stages,Alerts,Cases,Quality,First_Pass_Quality_pct,Defect_Rate_pct,Hold_Rate_pct\n";
     const body = rows
       .map(
         (r) =>
@@ -44,9 +44,9 @@ export default function OptimizePage() {
   return (
     <div className="w-full space-y-5 p-4 sm:p-5">
       <PageHeader
-        title="Reliability Optimization"
+        title="Production Quality Optimization"
         eyebrow="Optimize"
-        description="Benchmark reliability, maintenance effort, and production exposure by textile asset family."
+        description="Benchmark quality performance, alert load, and production exposure by fabric family."
         actions={
           <>
             <select value={days} onChange={(event) => setDays(Number(event.target.value))} className="rounded border border-outline-variant px-3 py-2 text-sm">
@@ -59,46 +59,46 @@ export default function OptimizePage() {
         }
       />
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <MetricCard label="Average MTBF" value={Math.round(rows.reduce((sum, row) => sum + row.mtbf, 0) / Math.max(rows.length, 1))} suffix=" h" icon="schedule" />
-        <MetricCard label="Average MTTR" value={Number((rows.reduce((sum, row) => sum + row.mttr, 0) / Math.max(rows.length, 1)).toFixed(1))} suffix=" h" icon="build" />
-        <MetricCard label="Downtime" value={Number(rows.reduce((sum, row) => sum + row.downtimeHrs, 0).toFixed(1))} suffix=" h" icon="factory" tone="critical" />
+        <MetricCard label="First-pass quality" value={Math.round(rows.reduce((sum, row) => sum + row.mtbf, 0) / Math.max(rows.length, 1))} suffix="%" icon="verified" />
+        <MetricCard label="Average defect rate" value={Number((rows.reduce((sum, row) => sum + row.mttr, 0) / Math.max(rows.length, 1)).toFixed(1))} suffix="%" icon="report_problem" />
+        <MetricCard label="Combined hold rate" value={Number(rows.reduce((sum, row) => sum + row.downtimeHrs, 0).toFixed(1))} suffix="%" icon="front_hand" tone="critical" />
         <MetricCard
-          label="Avoided downtime"
+          label="Protected production"
           value={avoidedPct}
           suffix="%"
-          caption="Share of potential interruption kept online"
+          caption="Share of potential quality loss contained"
           icon="savings"
           tone="highlight"
         />
       </div>
       <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2">
-        <ChartCard title="MTBF, MTTR, and downtime" description="Reliability and repair performance by family">
+        <ChartCard title="Quality, defect, and hold rates" description="Production-quality performance by family">
           <ReliabilityChart data={rows} />
         </ChartCard>
-        <ChartCard title="Health versus downtime share" description="Bubble size is alert count; vertical axis is each family's share of mill downtime">
+        <ChartCard title="Quality versus alert share" description="Bubble size is alert count; vertical axis is each family's share of quality events">
           <CostHealthScatter data={rows.map((row) => {
-            const totalDowntime = rows.reduce((sum, item) => sum + item.downtimeHrs, 0) || 1;
-            return { name: row.name.replace(/\s*Family$/i, ""), health: row.avgHealth, cost: Math.round((row.downtimeHrs / totalDowntime) * 100), alerts: row.alerts };
+            const totalAlerts = rows.reduce((sum, item) => sum + item.alerts, 0) || 1;
+            return { name: row.name.replace(/\s*Family$/i, ""), health: row.avgHealth, cost: Math.round((row.alerts / totalAlerts) * 100), alerts: row.alerts };
           })} />
         </ChartCard>
       </div>
       {analytics ? (
-        <ChartCard title="Downtime Pareto" description={`Estimated production interruption over ${analytics.periodDays} days`}>
-          <HorizontalRiskChart data={rows.map((row) => ({ name: row.name.replace(" Family", ""), downtime: row.downtimeHrs }))} dataKey="downtime" label="Downtime hours" height={220} />
+        <ChartCard title="Quality hold Pareto" description={`Estimated production hold rate over ${analytics.periodDays} days`}>
+          <HorizontalRiskChart data={rows.map((row) => ({ name: row.name.replace(" Family", ""), downtime: row.downtimeHrs }))} dataKey="downtime" label="Hold rate (%)" height={220} />
         </ChartCard>
       ) : null}
-      <DataTableShell title="Family reliability benchmark" minWidth={900}>
+      <DataTableShell title="Family quality benchmark" minWidth={900}>
         <table className="w-full text-left text-sm">
           <thead className="font-label-caps bg-surface-container-high text-on-surface-variant">
             <tr>
               <th className="px-4 py-3">Family</th>
-              <th>Assets</th>
+              <th>Stages</th>
               <th>Alerts</th>
               <th>Cases</th>
-              <th>Avg health</th>
-              <th>MTBF (h)</th>
-              <th>MTTR (h)</th>
-              <th>Downtime (h)</th>
+              <th>Avg quality</th>
+              <th>First pass</th>
+              <th>Defect rate</th>
+              <th>Hold rate</th>
             </tr>
           </thead>
           <tbody>
@@ -109,9 +109,9 @@ export default function OptimizePage() {
                 <td className="font-data-mono">{r.alerts}</td>
                 <td className="font-data-mono">{r.cases}</td>
                 <td className="font-data-mono">{r.avgHealth}%</td>
-                <td className="font-data-mono">{r.mtbf}</td>
-                <td className="font-data-mono">{r.mttr}</td>
-                <td className="font-data-mono">{r.downtimeHrs}</td>
+                <td className="font-data-mono">{r.mtbf}%</td>
+                <td className="font-data-mono">{r.mttr}%</td>
+                <td className="font-data-mono">{r.downtimeHrs}%</td>
               </tr>
             ))}
           </tbody>

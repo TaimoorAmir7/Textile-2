@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BackButton, isSubPage, rememberPath } from "@/components/PageTrail";
+import { BackButton, isSubPage } from "@/components/PageTrail";
 import { SearchBox } from "@/components/SearchBox";
+import { UstaadChat } from "@/components/UstaadChat";
 import { useMill } from "@/lib/use-mill";
 import { headerCrumbs, subscribeHeaderCrumbs } from "@/lib/header-path";
 import { describePath, recordVisit } from "@/lib/session-history";
@@ -48,7 +49,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    rememberPath(pathname);
     const visit = describePath(pathname);
     if (visit) recordVisit(visit);
   }, [pathname]);
@@ -68,33 +68,33 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen min-w-0 flex-col">
         <header className="sticky top-0 z-30 flex h-16 min-w-0 items-center justify-between gap-4 border-b border-outline-variant bg-surface-container-lowest/90 px-6 backdrop-blur-md sm:h-[4.5rem] sm:px-8 lg:px-10">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <Link href="/discover" className="shrink-0 leading-none" aria-label="Asset Reliability Platform">
+            <Link href="/discover" className="shrink-0 leading-none" aria-label="Production Reliability Platform">
               <span className="font-headline block text-[11px] font-extrabold tracking-[0.18em] text-primary uppercase sm:text-xs">
-                Asset Reliability
+                Production Reliability
               </span>
               <span className="mt-1 block text-[10px] font-semibold tracking-[0.28em] text-on-surface-variant uppercase">
                 Platform
               </span>
             </Link>
-            <div className="font-data-mono hidden min-w-0 items-center gap-1 text-outline sm:flex">
+            <nav aria-label="Breadcrumb" className="font-data-mono hidden min-w-0 items-center gap-1 overflow-hidden text-outline sm:flex">
               {headerCrumbs(pathname).map((crumb, index, crumbs) => {
                 const last = index === crumbs.length - 1;
                 return (
-                  <span key={`${crumb.label}-${index}`} className="flex min-w-0 items-center gap-1">
+                  <span key={`${crumb.label}-${index}`} className={`items-center gap-1 ${last ? "flex shrink-0" : "hidden min-w-0 xl:flex"}`}>
                     {index > 0 ? (
-                      <span className="material-symbols-outlined text-[12px]">chevron_right</span>
+                      <span className="material-symbols-outlined hidden text-[12px] xl:inline">chevron_right</span>
                     ) : null}
                     {last || !crumb.href ? (
-                      <span className="truncate font-bold text-primary">{crumb.label}</span>
+                      <span className="whitespace-nowrap font-bold text-primary" title={crumb.label}>{crumb.label}</span>
                     ) : (
-                      <Link href={crumb.href} className="hover:text-primary">
+                      <Link href={crumb.href} title={crumb.label} className="block min-w-0 max-w-28 truncate hover:text-primary lg:max-w-36 xl:max-w-44">
                         {crumb.label}
                       </Link>
                     )}
                   </span>
                 );
               })}
-            </div>
+            </nav>
           </div>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <SearchBox />
@@ -108,7 +108,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     : `/operate/assets?plant=${encodeURIComponent(e.target.value)}`,
                 );
               }}
-              className="hidden max-w-[180px] rounded-lg border border-transparent bg-transparent py-2 text-sm text-on-surface-variant lg:block"
+              className="hidden max-w-[180px] rounded-lg border border-transparent bg-transparent py-2 text-sm text-on-surface-variant xl:block"
             >
               <option value="all">Plant Selection</option>
               {plants.map((p) => (
@@ -175,6 +175,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </div>
       </nav>
+      <UstaadChat />
     </div>
   );
 }

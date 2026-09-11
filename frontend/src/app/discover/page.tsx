@@ -22,7 +22,7 @@ export default function DiscoverPage() {
             Discover Industries
           </h2>
           <p className="mt-1 max-w-3xl text-base text-on-surface-variant">
-            Explore asset reliability templates and optimization strategies tailored by industry.
+            Explore production reliability templates and optimization strategies tailored by industry.
             Select a vertical to begin deployment planning.
           </p>
         </div>
@@ -55,22 +55,21 @@ export default function DiscoverPage() {
                 </div>
                 <div className="flex flex-1 flex-col justify-between p-4">
                     <p className="mb-4 text-sm text-on-surface-variant">
-                      Advanced monitoring templates for high-speed spinning machines, industrial
-                      looms, and dye vats to minimize yarn breakage and ensure continuous production
-                      flow.
+                      Production-quality reliability for Woven and Knit / Hosiery fabric across six
+                      controlled fabrication stages, from greige inspection through folding and rolling.
                     </p>
                     <div className="mb-4 grid grid-cols-2 gap-3">
                       <div className="rounded border border-outline-variant bg-surface-bright p-2">
                         <span className="font-label-caps mb-1 block text-on-surface-variant">
-                          Total asset types
+                          Family stages
                         </span>
-                        <span className="font-data-mono text-base text-primary">142</span>
+                        <span className="font-data-mono text-base text-primary">12</span>
                       </div>
                       <div className="rounded border border-outline-variant bg-surface-bright p-2">
                         <span className="font-label-caps mb-1 block text-on-surface-variant">
                           Common templates
                         </span>
-                        <span className="font-data-mono text-base text-primary">Spinning Mchn V2</span>
+                        <span className="font-data-mono text-base text-primary">Stage Quality Gates</span>
                       </div>
                     </div>
                     <span className="font-label-caps mt-auto flex items-center gap-1 text-secondary group-hover:underline">
@@ -84,10 +83,10 @@ export default function DiscoverPage() {
                 <div className="flex flex-wrap items-center gap-2 border-t border-outline-variant px-4 py-3">
                   <span className="font-label-caps text-on-surface-variant">Popular solutions:</span>
                   <Link
-                    href="/discover/templates/loom-vibration-analysis"
+                    href="/discover/textiles/architecture"
                     className="text-sm font-medium text-primary hover:underline"
                   >
-                    Loom Vibration Analysis
+                    Shade &amp; Defect Causality
                   </Link>
                 </div>
               </div>
@@ -177,4 +176,3 @@ function CatalogCard({
     </div>
   );
 }
-

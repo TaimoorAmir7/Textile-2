@@ -85,14 +85,13 @@ export function getFamilyBySlug(slug: string) {
 
 export function listTemplates() {
   return [...store().templates]
-    .sort((a, b) => a.name.localeCompare(b.name))
     .map((template) => {
       const family = familyById(template.familyId);
       const familyAssets = store().assets.filter((asset) => asset.familyId === family.id);
       const assigned = store().assets.filter((asset) => asset.templateId === template.id);
       return {
         ...template,
-        family: { ...family, assets: familyAssets },
+        family: { ...family, assets: familyAssets.filter((asset) => asset.templateId === template.id) },
         _count: { assets: assigned.length },
       };
     });
@@ -107,7 +106,7 @@ export function getTemplateBySlug(slug: string) {
     family: {
       ...family,
       assets: store().assets
-        .filter((asset) => asset.familyId === family.id)
+        .filter((asset) => asset.familyId === family.id && asset.templateId === template.id)
         .map((asset) => ({ ...asset, plant: plantById(asset.plantId) })),
     },
   };

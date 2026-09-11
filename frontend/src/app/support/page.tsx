@@ -4,11 +4,11 @@ import { PageHeader } from "@/components/DashboardUI";
 export default function SupportPage() {
   return (
     <div className="w-full space-y-6 p-4 sm:p-6">
-      <PageHeader title="Reliability Support" eyebrow="Help center" description="Guided pathways for platform, template, and maintenance workflow questions." />
+      <PageHeader title="Production Reliability Support" eyebrow="Help center" description="Guided pathways for stage quality, templates, alerts, and investigation workflows." />
       <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <SupportCard icon="menu_book" title="Platform walkthrough" detail="Follow the complete reliability lifecycle from industry discovery to optimization." href="/discover/textiles" action="Start walkthrough" />
-        <SupportCard icon="warning" title="Investigate an alert" detail="Open the live queue, review diagnostics, acknowledge risk, and create a maintenance case." href="/operate/alerts" action="Open alert center" />
-        <SupportCard icon="assignment" title="Maintenance queue" detail="Track owners, priorities, linked alerts, and work-order references." href="/operate/cases" action="View cases" />
+        <SupportCard icon="menu_book" title="Platform walkthrough" detail="Follow the production-quality lifecycle from industry discovery to optimization." href="/discover/textiles" action="Start walkthrough" />
+        <SupportCard icon="warning" title="Investigate an alert" detail="Open the live queue, review stage evidence and causality, acknowledge risk, and create a quality case." href="/operate/alerts" action="Open alert center" />
+        <SupportCard icon="assignment" title="Quality case queue" detail="Track owners, priorities, linked defects, corrective actions, and disposition." href="/operate/cases" action="View cases" />
       </section>
       <section className="rounded-lg border border-outline-variant bg-surface-container-lowest p-5">
         <h2 className="font-headline text-lg font-semibold text-primary">Presentation support</h2>

@@ -1,6 +1,6 @@
-# Spark Reliability
+# Spark Production Reliability
 
-Textile asset reliability demo (C3-style Discover → Deploy → Operate → Optimize). Visuals follow the Stitch **Industrial Precision** system. Oil & Gas, Power Generation, and Manufacturing appear on Discover as catalog cards only — they do not open.
+Textile production-quality reliability demo (C3-style Discover → Deploy → Operate → Optimize). The textile vertical follows Woven and Knit / Hosiery lots through six fabrication stages. Visuals follow the Stitch **Industrial Precision** system. Oil & Gas, Power Generation, and Manufacturing appear on Discover as catalog cards only — they do not open.
 
 ## Stack
 
@@ -24,4 +24,4 @@ Set the service **Root Directory** to `frontend`. No `DATABASE_URL` or Prisma st
 
 ## Working path
 
-Discover (Textiles **View catalog**) → family → template → **Deploy this template** → Operate dashboard → alert investigation (Acknowledge / Snooze / Create case) → Cases → Optimize (CSV).
+Discover (Textiles **View catalog**) → Woven or Knit / Hosiery → stage → stage alert → global alert investigation (Acknowledge / Snooze / Create quality case) → Cases → Optimize (CSV).

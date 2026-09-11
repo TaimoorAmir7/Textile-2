@@ -7,7 +7,7 @@ export default function AlertsPage() {
     <AlertFeed
       title="Alerts"
       eyebrow="Operate"
-      description="Predictive events across spinning, weaving, and dyeing. Acknowledge here, then investigate into a case and work order."
+      description="Production-quality events across all six Woven and Knit stages. Acknowledge here, then investigate the stage and create a quality case."
     />
   );
 }

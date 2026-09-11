@@ -98,9 +98,9 @@ function CasesInner() {
     <div className="flex w-full flex-col gap-6 px-5 py-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="font-headline text-3xl font-bold">Case Management</h2>
+          <h2 className="font-headline text-3xl font-bold">Quality Case Management</h2>
           <p className="text-sm text-on-surface-variant">
-            Track, investigate, and resolve engineering and maintenance cases.
+            Track, investigate, contain, and resolve production-quality cases.
           </p>
         </div>
         <button
@@ -140,7 +140,7 @@ function CasesInner() {
             onChange={(e) => setForm({ ...form, assetId: e.target.value })}
             className="rounded border border-outline-variant px-3 py-2 text-sm"
           >
-            <option value="">Select asset</option>
+            <option value="">Select production stage</option>
             {assets.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.assetCode} — {a.name}
@@ -186,13 +186,13 @@ function CasesInner() {
 
       {analytics ? (
         <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-3">
-          <ChartCard title="Case pipeline" description="Maintenance workflow status">
+          <ChartCard title="Case pipeline" description="Quality containment workflow status">
             <DonutChart data={analytics.caseStatus} height={220} centerLabel="Cases" />
           </ChartCard>
-          <ChartCard title="Priority mix" description="Current maintenance exposure">
+          <ChartCard title="Priority mix" description="Current production-quality exposure">
             <DonutChart data={analytics.casePriority} height={220} centerLabel="Cases" />
           </ChartCard>
-          <ChartCard title="Resolution pressure" description="Downtime hours associated with reliability events">
+          <ChartCard title="Resolution pressure" description="Quality-event volume associated with production stages">
             <TrendChart data={analytics.series} height={220} showHealth={false} />
           </ChartCard>
         </div>

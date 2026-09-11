@@ -39,15 +39,15 @@ function AssetsInner() {
 
   return (
     <div className="w-full space-y-5 p-4 sm:p-5">
-      <PageHeader title="Asset Explorer" eyebrow="Operate" description="Health, monitoring coverage, and operational context for textile machinery." />
+      <PageHeader title="Production Stage Explorer" eyebrow="Operate" description="Quality condition, checklist coverage, and operational context for all Woven and Knit stages." />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <MetricCard label="Assets" value={rows.length} icon="precision_manufacturing" />
-        <MetricCard label="Monitored" value={rows.filter((asset) => asset.monitored).length} icon="sensors" />
+        <MetricCard label="Family stages" value={rows.length} icon="account_tree" />
+        <MetricCard label="Checklists active" value={rows.filter((asset) => asset.monitored).length} icon="fact_check" />
         <MetricCard label="At risk" value={rows.filter((asset) => asset.status !== "NOMINAL").length} icon="crisis_alert" tone="critical" />
-        <MetricCard label="Average health" value={Math.round(rows.reduce((sum, asset) => sum + asset.healthScore, 0) / Math.max(rows.length, 1))} suffix="%" icon="monitor_heart" />
+        <MetricCard label="Average quality" value={Math.round(rows.reduce((sum, asset) => sum + asset.healthScore, 0) / Math.max(rows.length, 1))} suffix="%" icon="monitor_heart" />
       </div>
       {analytics ? (
-        <ChartCard title="Asset health distribution" description="Fleet count grouped by reliability condition">
+        <ChartCard title="Stage quality distribution" description="Family-stage count grouped by production condition">
           <HorizontalRiskChart
             data={analytics.healthBuckets.map((bucket) => ({ name: bucket.range, assets: bucket.assets }))}
             dataKey="assets"
@@ -57,11 +57,11 @@ function AssetsInner() {
         </ChartCard>
       ) : null}
       <DataTableShell
-        title="Asset registry"
+        title="Production-stage registry"
         minWidth={900}
         action={
           <div className="flex flex-wrap gap-2">
-            <input value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Filter assets…" className="w-44 rounded border border-outline-variant px-3 py-1.5 text-sm" />
+            <input value={filter} onChange={(event) => setFilter(event.target.value)} placeholder="Filter stages…" className="w-44 rounded border border-outline-variant px-3 py-1.5 text-sm" />
             <select value={status} onChange={(event) => setStatus(event.target.value)} className="rounded border border-outline-variant px-2 py-1.5 text-sm">
               <option value="all">All conditions</option>
               <option value="NOMINAL">Nominal</option>
@@ -74,13 +74,13 @@ function AssetsInner() {
         <table className="w-full text-left text-sm">
           <thead className="font-label-caps bg-surface-container-high text-on-surface-variant">
             <tr>
-              <th className="px-4 py-3">Asset ID</th>
-              <th>Name</th>
+              <th className="px-4 py-3">Stage ID</th>
+              <th>Production stage</th>
               <th>Family</th>
               <th>Plant</th>
               <th>Status</th>
-              <th>Health</th>
-              <th>Monitored</th>
+              <th>Quality</th>
+              <th>Checklist</th>
             </tr>
           </thead>
           <tbody>

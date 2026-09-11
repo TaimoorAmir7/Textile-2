@@ -10,6 +10,7 @@ import {
   templatesForSearch,
 } from "./catalog";
 import { DEMO_NOW } from "./mill-data";
+import { AI_MODULES } from "./ai-modules";
 
 export function buildOverview() {
   const plants = listPlants();
@@ -70,7 +71,6 @@ export function buildAnalytics(requested = 30) {
       critical: Math.min(alertVolume, index % 6 === 0 ? 2 : index % 3 === 0 ? 1 : 0),
       health: Number(Math.max(65, Math.min(99, baseHealth + wave * 1.6 + index * 0.04)).toFixed(1)),
       downtime: Number(Math.max(0.3, alertVolume * 0.7 + Math.abs(wave) * 0.5).toFixed(1)),
-      maintenanceCost: Math.round(3200 + alertVolume * 760 + Math.abs(wave) * 540),
     };
   });
 
@@ -185,9 +185,9 @@ export function buildOptimize(requested = 30) {
         Math.round(family.assets.reduce((sum, asset) => sum + asset.healthScore, 0) / Math.max(assets, 1) + healthShift),
       ),
     );
-    const mtbf = Math.max(96, Math.round((420 - alerts * 18) * (days === 7 ? 1.08 : days === 90 ? 0.92 : 1)));
-    const mttr = Number((Math.max(1.4, 3.2 + cases * 0.4 + (days === 90 ? 0.5 : days === 7 ? -0.4 : 0))).toFixed(1));
-    const downtimeHrs = Number((alerts * 2.5 + cases * 1.1).toFixed(1));
+    const mtbf = avgHealth;
+    const mttr = Number(Math.min(20, (alerts / Math.max(assets * 2, 1)) * 100).toFixed(1));
+    const downtimeHrs = Number(Math.min(20, (cases / Math.max(assets * 3, 1)) * 100).toFixed(1));
     return {
       slug: family.slug,
       name: family.name,
@@ -218,20 +218,28 @@ export function buildSearch(query: string) {
 
   const pages: Hit[] = [
     { title: "Textiles & Apparel", sub: "Industry catalog", href: "/discover/textiles", icon: "apparel", group: "Pages" },
-    { title: "Asset Families", sub: "Discover", href: "/discover/textiles/families", icon: "precision_manufacturing", group: "Pages" },
-    { title: "Template Library", sub: "Discover", href: "/discover/textiles/templates", icon: "inventory_2", group: "Pages" },
-    { title: "Live Alerts", sub: "Textiles", href: "/discover/textiles/alerts", icon: "warning", group: "Pages" },
+    { title: "Production Families", sub: "Discover", href: "/discover/textiles/families", icon: "precision_manufacturing", group: "Pages" },
+    { title: "AI Modules", sub: "Discover", href: "/discover/textiles/solutions", icon: "neurology", group: "Pages" },
+    { title: "Stage Templates", sub: "Discover", href: "/discover/textiles/templates", icon: "inventory_2", group: "Pages" },
+    { title: "Production Alerts", sub: "Operate", href: "/operate/alerts", icon: "warning", group: "Pages" },
     { title: "Case Management", sub: "Operate", href: "/operate/cases", icon: "assignment", group: "Pages" },
     { title: "Work Orders", sub: "Operate", href: "/operate/work-orders", icon: "engineering", group: "Pages" },
-    { title: "Plant assets", sub: "Operate", href: "/operate/assets", icon: "factory", group: "Pages" },
-    { title: "Reliability Optimization", sub: "Optimize", href: "/optimize", icon: "query_stats", group: "Pages" },
+    { title: "Production stages", sub: "Operate", href: "/operate/assets", icon: "factory", group: "Pages" },
+    { title: "Production Quality Optimization", sub: "Optimize", href: "/optimize", icon: "query_stats", group: "Pages" },
   ];
 
   const hits: Hit[] = [
     ...pages,
+    ...AI_MODULES.map((module) => ({
+      title: module.name,
+      sub: "AI module",
+      href: `/discover/textiles/solutions/${module.slug}`,
+      icon: module.icon,
+      group: "AI Modules",
+    })),
     ...families.map((family) => ({
       title: family.name,
-      sub: "Asset family",
+      sub: "Production family",
       href: `/discover/textiles/families/${family.slug}`,
       icon: "precision_manufacturing",
       group: "Families",
@@ -248,7 +256,7 @@ export function buildSearch(query: string) {
       sub: `${asset.plant.name} — ${asset.location}`,
       href: `/operate/assets?q=${encodeURIComponent(asset.assetCode)}`,
       icon: "memory",
-      group: "Assets",
+      group: "Stages",
     })),
     ...alerts.map((alert) => ({
       title: alert.title,
@@ -263,7 +271,7 @@ export function buildSearch(query: string) {
     ? hits.filter((hit) => match(hit.title, hit.sub, hit.group, hit.href))
     : hits.filter((hit) => hit.group === "Pages" || hit.group === "Families" || hit.group === "Templates").slice(0, 8);
 
-  const groups = ["Pages", "Families", "Templates", "Assets", "Alerts"]
+  const groups = ["Pages", "Families", "Templates", "Stages", "Alerts"]
     .map((group) => ({
       group,
       items: filtered.filter((hit) => hit.group === group).slice(0, 5),

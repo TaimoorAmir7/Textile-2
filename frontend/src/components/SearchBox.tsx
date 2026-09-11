@@ -75,6 +75,7 @@ export function SearchBox() {
         search
       </span>
       <input
+        role="combobox"
         value={query}
         onChange={(event) => {
           setQuery(event.target.value);
@@ -82,13 +83,14 @@ export function SearchBox() {
         }}
         onFocus={() => setOpen(true)}
         onKeyDown={onKeyDown}
-        placeholder="Search industries, assets..."
-        className="w-44 rounded-lg border border-outline-variant bg-surface-container-low py-1.5 pr-3 pl-9 text-sm outline-none focus:border-primary lg:w-64 xl:w-80"
+        placeholder="Search families, stages, alerts..."
+        className="w-44 rounded-lg border border-outline-variant bg-surface-container-low py-1.5 pr-3 pl-9 text-sm outline-none focus:border-primary xl:w-64 2xl:w-80"
         aria-autocomplete="list"
-        aria-expanded={open}
+        aria-controls="global-search-results"
+        aria-expanded={open ? "true" : "false"}
       />
       {open ? (
-        <div className="absolute top-[calc(100%+8px)] right-0 z-50 w-[min(100vw-2rem,360px)] overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-[0_18px_40px_-20px_rgba(16,20,22,0.35)]">
+        <div id="global-search-results" className="absolute top-[calc(100%+8px)] right-0 z-50 w-[min(100vw-2rem,360px)] overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-[0_18px_40px_-20px_rgba(16,20,22,0.35)]">
           {groups.length ? (
             <ul className="max-h-80 overflow-y-auto py-1">
               {groups.map((group) => (
@@ -120,7 +122,7 @@ export function SearchBox() {
             </ul>
           ) : (
             <p className="px-3 py-4 text-sm text-on-surface-variant">
-              {query.trim() ? `No matches for “${query}”.` : "Start typing to search pages, assets, and alerts."}
+              {query.trim() ? `No matches for “${query}”.` : "Start typing to search pages, stages, and alerts."}
             </p>
           )}
         </div>

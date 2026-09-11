@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -21,11 +21,22 @@ import { recordVisit } from "@/lib/session-history";
 
 type Point = { t: number; v: number };
 type Payload = {
-  vibration: Point[];
-  temperature: Point[];
-  failureModes: { name: string; confidence: number }[];
+  qualityScoreSeries: Point[];
+  processComplianceSeries: Point[];
+  causality: { name: string; confidence: number }[];
   rootCauses: string[];
   actions: { title: string; detail: string }[];
+  stageSlug?: string;
+  stageLabel?: string;
+  suspectedStageLabel?: string;
+  image?: string;
+  machine?: string;
+  fabricState?: string;
+  batchCode?: string;
+  affectedQuantity?: number;
+  unit?: string;
+  observation?: string;
+  disposition?: string;
 };
 type Alert = {
   id: string;
@@ -43,41 +54,6 @@ type Alert = {
     family: { slug: string; name: string };
   };
 };
-
-function schematicFor(alert: Alert) {
-  const slug = alert.asset.family?.slug ?? "";
-  const title = alert.title.toLowerCase();
-  if (slug.includes("spinning") || title.includes("spindle") || title.includes("bearing")) {
-    if (title.includes("bearing") || title.includes("alignment") || title.includes("spindle")) {
-      return {
-        src: "/schematics/spinning-ring-traveller.png",
-        alt: "Labeled ring, traveller, and spindle assembly",
-        caption: "Ring, traveller, and spindle",
-        hotspot: { top: "68%", left: "54%" },
-      };
-    }
-    return {
-      src: "/schematics/spinning-sensor-map.png",
-      alt: "Ring spinning frame sensor placement",
-      caption: "Spinning frame sensor map",
-      hotspot: { top: "74%", left: "30%" },
-    };
-  }
-  if (slug.includes("loom") || title.includes("loom") || title.includes("yarn") || title.includes("sley")) {
-    return {
-      src: "/schematics/loom-sensor-map.png",
-      alt: "Air-jet loom with vibration, pressure, and tension sensors",
-      caption: "Air-jet loom sensor map",
-      hotspot: { top: "32%", left: "48%" },
-    };
-  }
-  return {
-    src: "/schematics/dye-pump-hex.png",
-    alt: "Jet dyeing pump, heat exchanger, and addition tank",
-    caption: "Dye liquor pump and heat exchanger",
-    hotspot: { top: "42%", left: "46%" },
-  };
-}
 
 export default function InvestigationPage() {
   const { id } = useParams<{ id: string }>();
@@ -117,19 +93,18 @@ export default function InvestigationPage() {
   if (!alert) return <div className="p-6 text-sm text-on-surface-variant">Loading investigation…</div>;
 
   const payload = alert.payload;
-  const diagnostics = payload.vibration?.map((p, i) => ({
+  const diagnostics = payload.qualityScoreSeries?.map((p, i) => ({
     t: p.t,
-    vibration: p.v,
-    temperature: payload.temperature?.[i]?.v,
+    qualityScore: p.v,
+    processCompliance: payload.processComplianceSeries?.[i]?.v,
   })) ?? [];
   const visibleDiagnostics = range === "1H" ? diagnostics.slice(-6) : diagnostics;
-  const drawing = schematicFor(alert);
 
   return (
     <div className="p-6">
       <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <p className="font-label-caps text-on-surface-variant">Alert Investigation</p>
+          <p className="font-label-caps text-on-surface-variant">Production Quality Alert</p>
           <h2 className="font-headline mt-1 flex flex-wrap items-center gap-3 text-2xl font-bold sm:text-3xl">
             {alert.title}
             <span className="rounded-sm bg-error px-2 py-1 font-label-caps text-[10px] text-on-error">
@@ -137,8 +112,8 @@ export default function InvestigationPage() {
             </span>
           </h2>
           <p className="mt-2 flex items-center gap-2 text-sm text-on-surface-variant">
-            <span className="material-symbols-outlined text-sm">factory</span>
-            {alert.asset.plant.name}
+            <span className="material-symbols-outlined text-sm">inventory_2</span>
+            {payload.batchCode} · {alert.asset.family.name} · {payload.stageLabel}
             <span>|</span>
             Detected: {new Date(alert.detectedAt).toLocaleString()}
           </p>
@@ -165,19 +140,22 @@ export default function InvestigationPage() {
             className="flex items-center gap-2 rounded bg-primary px-4 py-2 text-sm font-medium text-on-primary"
           >
             <span className="material-symbols-outlined text-sm">assignment_add</span>
-            Create Case
+            Create Quality Case
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 space-y-4 lg:col-span-8">
-          <div className="h-[320px] rounded-2xl border border-outline-variant bg-surface-container-lowest p-4">
+          <div
+            data-testid="quality-trend-card"
+            className="flex h-[420px] flex-col rounded-2xl border border-outline-variant bg-surface-container-lowest p-4"
+          >
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <h3 className="font-headline text-lg font-semibold">Time-Series Diagnostics</h3>
+              <h3 className="font-headline text-lg font-semibold">Quality Evidence Trend</h3>
               <div className="flex flex-wrap items-center gap-3 text-[11px] text-on-surface-variant">
-                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ background: theme.primary }} />Vibration (mm/s)</span>
-                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ background: theme.secondary }} />Temperature (°C)</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ background: theme.primary }} />Quality score</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm" style={{ background: theme.secondary }} />Process compliance</span>
               </div>
               <div className="flex rounded border border-outline-variant p-0.5">
                 {(["1H", "24H", "7D"] as const).map((item) => (
@@ -187,25 +165,27 @@ export default function InvestigationPage() {
                 ))}
               </div>
             </div>
-            <ResponsiveContainer width="100%" height="85%">
-              <LineChart data={visibleDiagnostics} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                <CartesianGrid stroke={theme.grid} strokeDasharray="3 5" vertical={false} />
-                <XAxis dataKey="t" tick={{ fill: theme.axis, fontSize: 11 }} minTickGap={24} />
-                <YAxis yAxisId="vibration" tick={{ fill: theme.axis, fontSize: 11 }} label={{ value: "mm/s", angle: -90, position: "insideLeft", fill: theme.axis, fontSize: 11 }} />
-                <YAxis yAxisId="temperature" orientation="right" tick={{ fill: theme.axis, fontSize: 11 }} label={{ value: "°C", angle: 90, position: "insideRight", fill: theme.axis, fontSize: 11 }} />
-                <Tooltip content={<InfoTooltip />} wrapperStyle={chartTooltipWrapper} />
-                <ReferenceLine yAxisId="vibration" y={4.5} stroke={theme.error} strokeDasharray="5 4" label={{ value: "Alert threshold", fill: theme.error, fontSize: 10, position: "insideBottomRight" }} />
-                <Line yAxisId="vibration" type="natural" dataKey="vibration" stroke={theme.primary} strokeWidth={2.6} dot={false} activeDot={{ r: 6 }} name="Vibration (mm/s)" />
-                <Line yAxisId="temperature" type="natural" dataKey="temperature" stroke={theme.secondary} strokeWidth={2.6} dot={false} activeDot={{ r: 6 }} name="Temperature (°C)" />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="min-h-0 flex-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={visibleDiagnostics} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid stroke={theme.grid} strokeDasharray="3 5" vertical={false} />
+                  <XAxis dataKey="t" tick={{ fill: theme.axis, fontSize: 11 }} minTickGap={24} />
+                  <YAxis yAxisId="quality" domain={[60, 100]} tick={{ fill: theme.axis, fontSize: 11 }} label={{ value: "score", angle: -90, position: "insideLeft", fill: theme.axis, fontSize: 11 }} />
+                  <YAxis yAxisId="compliance" domain={[60, 100]} orientation="right" tick={{ fill: theme.axis, fontSize: 11 }} label={{ value: "%", angle: 90, position: "insideRight", fill: theme.axis, fontSize: 11 }} />
+                  <Tooltip content={<InfoTooltip />} wrapperStyle={chartTooltipWrapper} />
+                  <ReferenceLine yAxisId="quality" y={75} stroke={theme.error} strokeDasharray="5 4" label={{ value: "Quality threshold", fill: theme.error, fontSize: 10, position: "insideBottomRight" }} />
+                  <Line yAxisId="quality" type="natural" dataKey="qualityScore" stroke={theme.primary} strokeWidth={2.6} dot={false} activeDot={{ r: 6 }} name="Quality score" />
+                  <Line yAxisId="compliance" type="natural" dataKey="processCompliance" stroke={theme.secondary} strokeWidth={2.6} dot={false} activeDot={{ r: 6 }} name="Process compliance" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="rounded border border-outline-variant bg-surface-container-lowest p-4">
-              <h3 className="mb-4 font-headline text-lg font-semibold">AI Analysis</h3>
-              <p className="font-label-caps mb-2 text-on-surface-variant">Likely Failure Modes</p>
+              <h3 className="mb-4 font-headline text-lg font-semibold">Stage Causality</h3>
+              <p className="font-label-caps mb-2 text-on-surface-variant">Suspected Source Stage</p>
               <div className="space-y-3">
-                {payload.failureModes?.map((m) => (
+                {payload.causality?.map((m) => (
                   <div key={m.name}>
                     <div className="mb-1 flex justify-between text-sm">
                       <span>{m.name}</span>
@@ -217,7 +197,7 @@ export default function InvestigationPage() {
                   </div>
                 ))}
               </div>
-              <p className="font-label-caps mt-4 mb-2 text-on-surface-variant">Root Cause Indicators</p>
+              <p className="font-label-caps mt-4 mb-2 text-on-surface-variant">Quality Evidence</p>
               <ul className="list-inside list-disc text-sm">
                 {payload.rootCauses?.map((c) => (
                   <li key={c}>{c}</li>
@@ -242,38 +222,33 @@ export default function InvestigationPage() {
         </div>
         <div className="col-span-12 lg:col-span-4">
           <div className="space-y-4">
-          <div className="rounded border border-outline-variant bg-surface-container-lowest p-4">
-            <h3 className="mb-3 font-headline text-lg font-semibold">Component Schematic</h3>
-            <div className="overflow-hidden rounded border border-outline-variant bg-white">
-              <div className="relative h-72">
-                <img src={drawing.src} alt={drawing.alt} className="h-full w-full object-contain p-2" />
-                {alert.severity !== "NOMINAL" ? (
-                  <>
-                    <span
-                      className="absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-error/40"
-                      style={drawing.hotspot}
-                    />
-                    <span
-                      className="pulse-dot absolute h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-error"
-                      style={drawing.hotspot}
-                    />
-                  </>
-                ) : null}
+          <div
+            data-testid="stage-image-card"
+            className="flex h-[420px] flex-col rounded-2xl border border-outline-variant bg-surface-container-lowest p-4"
+          >
+            <h3 className="mb-3 font-headline text-lg font-semibold">Stage Image</h3>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded border border-outline-variant bg-white">
+              <div className="relative min-h-0 flex-1">
+                {payload.image ? <Image src={payload.image} alt={`${payload.machine ?? payload.stageLabel} at ${payload.stageLabel}`} fill priority sizes="(max-width: 1024px) 100vw, 33vw" className="object-contain p-2" /> : null}
               </div>
               <p className="border-t border-outline-variant bg-surface-container-low px-3 py-2 font-label-caps text-on-surface-variant">
-                {drawing.caption} · {alert.asset.assetCode}
+                {payload.machine} · {alert.asset.assetCode}
               </p>
             </div>
           </div>
           <div className="rounded border border-outline-variant bg-surface-container-lowest p-4">
-            <h3 className="mb-4 font-headline text-lg font-semibold">Asset Details</h3>
+            <h3 className="mb-4 font-headline text-lg font-semibold">Production Context</h3>
             <div className="grid grid-cols-2 gap-y-2 text-sm">
-              <div className="text-on-surface-variant">Asset ID</div>
+              <div className="text-on-surface-variant">Stage ID</div>
               <div className="font-data-mono text-right">{alert.asset.assetCode}</div>
-              <div className="text-on-surface-variant">Model</div>
-              <div className="text-right">{alert.asset.model}</div>
-              <div className="text-on-surface-variant">Last Service</div>
-              <div className="text-right">{alert.asset.lastService}</div>
+              <div className="text-on-surface-variant">Detected at</div>
+              <div className="text-right">{payload.stageLabel}</div>
+              <div className="text-on-surface-variant">Suspected source</div>
+              <div className="text-right">{payload.suspectedStageLabel}</div>
+              <div className="text-on-surface-variant">Affected</div>
+              <div className="font-data-mono text-right">{payload.affectedQuantity?.toLocaleString()} {payload.unit}</div>
+              <div className="text-on-surface-variant">Disposition</div>
+              <div className="text-right">{payload.disposition}</div>
               <div className="text-on-surface-variant">Status</div>
               <div className="text-right capitalize">{alert.status}</div>
             </div>

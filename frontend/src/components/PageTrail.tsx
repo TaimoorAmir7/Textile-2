@@ -2,9 +2,6 @@
 
 import { usePathname, useRouter } from "next/navigation";
 
-const PREV_KEY = "spark-prev-path";
-const HERE_KEY = "spark-here-path";
-
 export function templateHref(
   templates: { slug: string; name: string }[] | undefined,
   title: string,
@@ -18,33 +15,36 @@ export function templateHref(
   return match ? `/discover/templates/${match.slug}` : null;
 }
 
+export function parentPath(pathname: string) {
+  const stage = pathname.match(/^(\/discover\/textiles\/families\/[^/]+)\/[^/]+$/);
+  if (stage) return stage[1];
+
+  if (/^\/discover\/textiles\/families\/[^/]+$/.test(pathname)) return "/discover/textiles/families";
+
+  const solutionChild = pathname.match(/^(\/discover\/textiles\/solutions\/[^/]+)\/[^/]+$/);
+  if (solutionChild) return solutionChild[1];
+
+  if (/^\/discover\/textiles\/solutions\/[^/]+$/.test(pathname)) return "/discover/textiles/solutions";
+
+  if (/^\/discover\/templates\/[^/]+$/.test(pathname)) return "/discover/textiles/templates";
+  if (/^\/deploy\/[^/]+$/.test(pathname)) return "/deploy";
+  if (/^\/operate\/alerts\/[^/]+$/.test(pathname)) return "/operate/alerts";
+  if (pathname.startsWith("/operate")) return "/operate";
+  if (pathname.startsWith("/discover")) return "/discover";
+  if (pathname.startsWith("/optimize")) return "/optimize";
+  return "/discover";
+}
+
 export function isSubPage(pathname: string) {
   return (
     /^\/discover\/textiles\/families\/[^/]+$/.test(pathname) ||
+    /^\/discover\/textiles\/families\/[^/]+\/[^/]+$/.test(pathname) ||
+    /^\/discover\/textiles\/solutions\/[^/]+$/.test(pathname) ||
+    /^\/discover\/textiles\/solutions\/[^/]+\/[^/]+$/.test(pathname) ||
     /^\/discover\/templates\/[^/]+$/.test(pathname) ||
     /^\/deploy\/[^/]+$/.test(pathname) ||
     /^\/operate\/alerts\/[^/]+$/.test(pathname)
   );
-}
-
-export function rememberPath(pathname: string) {
-  try {
-    const here = sessionStorage.getItem(HERE_KEY);
-    if (here && here !== pathname) {
-      sessionStorage.setItem(PREV_KEY, here);
-    }
-    sessionStorage.setItem(HERE_KEY, pathname);
-  } catch {
-    /* ignore */
-  }
-}
-
-function fallbackFor(pathname: string) {
-  if (pathname.startsWith("/operate")) return "/operate";
-  if (pathname.startsWith("/deploy/")) return "/deploy";
-  if (pathname.startsWith("/discover")) return "/discover";
-  if (pathname.startsWith("/optimize")) return "/optimize";
-  return "/discover";
 }
 
 export function BackButton({ fallback }: { fallback?: string }) {
@@ -52,20 +52,7 @@ export function BackButton({ fallback }: { fallback?: string }) {
   const pathname = usePathname();
 
   function goBack() {
-    try {
-      const prev = sessionStorage.getItem(PREV_KEY);
-      if (prev && prev !== pathname) {
-        router.push(prev);
-        return;
-      }
-    } catch {
-      /* use history */
-    }
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-      return;
-    }
-    router.push(fallback ?? fallbackFor(pathname));
+    router.replace(fallback ?? parentPath(pathname));
   }
 
   return (
